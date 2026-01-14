@@ -1,0 +1,40 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Redirect hr-training to its public folder
+    RewriteCond %{REQUEST_URI} ^/hr-training
+    RewriteCond %{REQUEST_URI} !^/hr-training/public
+    RewriteRule ^hr-training/(.*)$ /hr-training/public/$1 [L]
+
+    # Handle root URL (https://democodes.online/)
+    RewriteRule ^$ public/index.php [L]
+
+    # Handle all other URLs (but not hr-training)
+    RewriteCond %{REQUEST_URI} !^/hr-training
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ public/index.php?url=$1 [L,QSA]
+</IfModule>
+
+# Security
+Options -Indexes
+
+# Block sensitive folders
+RewriteRule ^app/ - [F,L]
+RewriteRule ^database/ - [F,L]
+RewriteRule ^hr-training/app/ - [F,L]
+RewriteRule ^hr-training/database/ - [F,L]
+RewriteRule ^hr-training/storage/ - [F,L]
+RewriteRule ^hr-training/bootstrap/ - [F,L]
+
+# Block sensitive files
+<FilesMatch "\.(sql|db|log|ini|conf|bak|env)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Allow .htaccess files
+<Files ".htaccess">
+    Order allow,deny
+    Allow from all
+</Files>
