@@ -218,15 +218,104 @@
                                             </td>
                                             <td class="py-3 text-end px-4">
                                                 <div class="btn-group btn-group-sm">
-                                                    <button type="button" class="btn btn-outline-primary" title="Update Status">
+                                                    <button type="button" class="btn btn-outline-primary" title="Update Status" data-bs-toggle="modal" data-bs-target="#updateStatusModal{{ $attendance->id }}">
                                                         <i class="bi bi-check-circle"></i>
                                                     </button>
-                                                    <button type="button" class="btn btn-outline-danger" title="Remove">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
+                                                    @if(!$attendance->certificate_uploaded)
+                                                        <button type="button" class="btn btn-outline-success" title="Upload Certificate" data-bs-toggle="modal" data-bs-target="#uploadCertModal{{ $attendance->id }}">
+                                                            <i class="bi bi-upload"></i>
+                                                        </button>
+                                                    @else
+                                                        <a href="{{ route('trainings.attendance.download-certificate', $attendance) }}" class="btn btn-outline-info" title="Download Certificate">
+                                                            <i class="bi bi-download"></i>
+                                                        </a>
+                                                    @endif
+                                                    <form action="{{ route('trainings.attendance.destroy', $attendance) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this attendee?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-outline-danger" title="Remove">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </td>
                                         </tr>
+                                        
+                                        <!-- Update Status Modal -->
+                                        <div class="modal fade" id="updateStatusModal{{ $attendance->id }}" tabindex="-1">
+                                            <div class="modal-dialog modal-sm">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h6 class="modal-title">Update Attendance</h6>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <form action="{{ route('trainings.attendance.update-status', $attendance) }}" method="POST">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label class="form-label small">Status</label>
+                                                                <select name="attendance_status" class="form-select form-select-sm" required>
+                                                                    <option value="attended" {{ $attendance->attendance_status === 'attended' ? 'selected' : '' }}>Attended</option>
+                                                                    <option value="absent" {{ $attendance->attendance_status === 'absent' ? 'selected' : '' }}>Absent</option>
+                                                                    <option value="pending" {{ $attendance->attendance_status === 'pending' ? 'selected' : '' }}>Pending</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label small">Remarks (Optional)</label>
+                                                                <textarea name="remarks" class="form-control form-control-sm" rows="2">{{ $attendance->remarks }}</textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Upload Certificate Modal -->
+                                        @if(!$attendance->certificate_uploaded)
+                                        <div class="modal fade" id="uploadCertModal{{ $attendance->id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h6 class="modal-title">Upload Certificate</h6>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <form action="{{ route('trainings.attendance.upload-certificate', $attendance) }}" method="POST" enctype="multipart/form-data">
+                                                        @csrf
+                                                        <div class="modal-body">
+                                                            <p class="small text-muted mb-3">
+                                                                <strong>Employee:</strong> {{ $attendance->employee->getFullNameAttribute() }}
+                                                            </p>
+                                                            <div class="mb-3">
+                                                                <label class="form-label small">Certificate File <span class="text-danger">*</span></label>
+                                                                <input type="file" name="certificate" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                                <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label small">Certificate Number</label>
+                                                                <input type="text" name="certificate_number" class="form-control form-control-sm" placeholder="e.g., CERT-2024-001">
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label small">Certificate Date</label>
+                                                                <input type="date" name="certificate_date" class="form-control form-control-sm" value="{{ date('Y-m-d') }}">
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="submit" class="btn btn-sm btn-success">
+                                                                <i class="bi bi-upload me-1"></i>Upload
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endif
+                                    </tr>
                                     @endforeach
                                 </tbody>
                             </table>
@@ -281,25 +370,49 @@
                         <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAttendeeModal">
                             <i class="bi bi-person-plus me-2"></i>Add Attendee
                         </button>
-                        @if($training->status === 'scheduled')
-                            <form action="#" method="POST" class="d-inline">
+                        
+                        @if($training->attendances->count() > 0)
+                            <form action="{{ route('trainings.attendance.mark-all-attended', $training) }}" method="POST" onsubmit="return confirm('Mark all attendees as attended?')">
                                 @csrf
                                 <button type="submit" class="btn btn-outline-success btn-sm w-100">
-                                    <i class="bi bi-play-circle me-2"></i>Mark as Ongoing
+                                    <i class="bi bi-check-all me-2"></i>Mark All Attended
+                                </button>
+                            </form>
+                            
+                            <form action="{{ route('trainings.attendance.notify', $training) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-info btn-sm w-100">
+                                    <i class="bi bi-bell me-2"></i>Send Notifications
                                 </button>
                             </form>
                         @endif
+                        
+                        @if($training->status === 'scheduled')
+                            <hr class="my-2">
+                            <form action="#" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-warning btn-sm w-100">
+                                    <i class="bi bi-play-circle me-2"></i>Start Training
+                                </button>
+                            </form>
+                        @endif
+                        
                         @if($training->status === 'ongoing')
+                            <hr class="my-2">
                             <form action="#" method="POST" class="d-inline">
                                 @csrf
                                 <button type="submit" class="btn btn-outline-secondary btn-sm w-100">
-                                    <i class="bi bi-check-circle me-2"></i>Mark as Completed
+                                    <i class="bi bi-check-circle me-2"></i>Complete Training
                                 </button>
                             </form>
                         @endif
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="alert('Export feature coming soon')">
-                            <i class="bi bi-download me-2"></i>Export Attendance
-                        </button>
+                        
+                        @if($training->attendances->count() > 0)
+                            <hr class="my-2">
+                            <a href="{{ route('trainings.attendance.export', $training) }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-download me-2"></i>Export Attendance
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -333,26 +446,47 @@
                 <h5 class="modal-title">Add Attendee</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <form action="#" method="POST">
-                    @csrf
+            <form action="{{ route('trainings.attendance.add', $training) }}" method="POST">
+                @csrf
+                <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Select Employee</label>
-                        <select name="employee_id" class="form-select" required>
+                        <label class="form-label">Select Employee <span class="text-danger">*</span></label>
+                        <select name="employee_id" class="form-select" required id="employeeSelect">
                             <option value="">Choose employee...</option>
-                            @foreach(\App\Models\Employee::where('status', 'active')->get() as $emp)
+                            @php
+                                $eligibleEmployees = \App\Models\Employee::where('status', 'active')
+                                    ->when($training->rank_level !== 'all', function($q) use ($training) {
+                                        $q->where('rank_level', $training->rank_level);
+                                    })
+                                    ->whereNotIn('id', $training->attendances->pluck('employee_id'))
+                                    ->with('department')
+                                    ->orderBy('last_name')
+                                    ->get();
+                            @endphp
+                            @foreach($eligibleEmployees as $emp)
                                 <option value="{{ $emp->id }}">
                                     {{ $emp->getFullNameAttribute() }} - {{ $emp->employee_number }}
+                                    ({{ $emp->department->name ?? 'N/A' }})
                                 </option>
                             @endforeach
                         </select>
+                        @if($eligibleEmployees->count() === 0)
+                            <small class="text-muted">No eligible employees available to add.</small>
+                        @endif
                     </div>
-                    <div class="d-flex gap-2 justify-content-end">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Add Attendee</button>
-                    </div>
-                </form>
-            </div>
+                    @if($training->rank_level !== 'all')
+                        <div class="alert alert-info alert-sm">
+                            <small><i class="bi bi-info-circle me-2"></i>Only showing <strong>{{ ucfirst($training->rank_level) }}</strong> rank employees.</small>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" {{ $eligibleEmployees->count() === 0 ? 'disabled' : '' }}>
+                        <i class="bi bi-plus-circle me-1"></i>Add Attendee
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

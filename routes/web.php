@@ -10,7 +10,9 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\EmployeeFileController;
 use App\Http\Controllers\TrainingSurveyController;
-use App\Http\Controllers\PublicFileController;
+use App\Http\Controllers\EmployeeFileController;
+use App\Http\Controllers\TrainingAttendanceController;
+use App\Http\Controllers\HRDocumentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ReportController;
@@ -49,8 +51,27 @@ Route::middleware(['auth'])->group(function () {
         // Department Management
         Route::resource('departments', DepartmentController::class);
         
+        // Employee Files Management (201 Files)
+        Route::get('employees/{employee}/files', [EmployeeFileController::class, 'index'])->name('employee-files.index');
+        Route::get('employees/{employee}/files/create', [EmployeeFileController::class, 'create'])->name('employee-files.create');
+        Route::post('employees/{employee}/files', [EmployeeFileController::class, 'store'])->name('employee-files.store');
+        Route::get('files/{file}/download', [EmployeeFileController::class, 'download'])->name('employee-files.download');
+        Route::delete('files/{file}', [EmployeeFileController::class, 'destroy'])->name('employee-files.destroy');
+        
         // Training Management
         Route::resource('trainings', TrainingController::class);
+        
+        // Training Attendance Management
+        Route::post('trainings/{training}/attendance', [TrainingAttendanceController::class, 'store'])->name('trainings.attendance.add');
+        Route::put('trainings/attendance/{attendance}/status', [TrainingAttendanceController::class, 'updateStatus'])->name('trainings.attendance.update-status');
+        Route::post('trainings/attendance/{attendance}/certificate', [TrainingAttendanceController::class, 'uploadCertificate'])->name('trainings.attendance.upload-certificate');
+        Route::get('trainings/attendance/{attendance}/certificate/download', [TrainingAttendanceController::class, 'downloadCertificate'])->name('trainings.attendance.download-certificate');
+        Route::delete('trainings/attendance/{attendance}', [TrainingAttendanceController::class, 'destroy'])->name('trainings.attendance.destroy');
+        Route::post('trainings/{training}/attendance/bulk', [TrainingAttendanceController::class, 'bulkUpdate'])->name('trainings.attendance.bulk-update');
+        Route::post('trainings/{training}/attendance/mark-all-attended', [TrainingAttendanceController::class, 'markAllAttended'])->name('trainings.attendance.mark-all-attended');
+        Route::post('trainings/{training}/attendance/notify', [TrainingAttendanceController::class, 'sendNotifications'])->name('trainings.attendance.notify');
+        Route::get('trainings/{training}/attendance/eligible', [TrainingAttendanceController::class, 'getEligibleEmployees'])->name('trainings.attendance.eligible');
+        Route::get('trainings/{training}/attendance/export', [TrainingAttendanceController::class, 'exportAttendance'])->name('trainings.attendance.export');
         
         // Training Topics
         Route::get('training-topics', function() {
@@ -62,8 +83,8 @@ Route::middleware(['auth'])->group(function () {
             return redirect()->route('dashboard')->with('info', 'Feature coming soon');
         })->name('surveys.index');
         
-        // Public Files
-        Route::resource('public-files', PublicFileController::class);
+        // HR Documents (Secure Files)
+        Route::resource('hr-documents', HRDocumentController::class);
         
         // Reports
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
@@ -76,8 +97,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/my-trainings', [TrainingController::class, 'myTrainings'])->name('my-trainings');
         Route::get('/my-files', [EmployeeFileController::class, 'myFiles'])->name('my-files');
         
-        // Training Survey
-        Route::get('/training-survey', [TrainingSurveyController::class, 'show'])->name('training-survey');
+        // Training Surveys
+        Route::get('training-surveys', [TrainingSurveyController::class, 'index'])->name('training-surveys.index');
+        Route::get('training-surveys/{survey}', [TrainingSurveyController::class, 'show'])->name('training-surveys.show');
+        
+        // Training Survey (Employee)
+        Route::get('/training-survey', [TrainingSurveyController::class, 'form'])->name('training-survey.form');
+        Route::post('/training-survey', [TrainingSurveyController::class, 'submit'])->name('training-survey.submit');
     });
     
     // Messages (All authenticated users)

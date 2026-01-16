@@ -1,0 +1,21 @@
+# Prevent directory listing
+Options -Indexes
+
+# Protect sensitive files
+<FilesMatch "\.(php|sql|log|ini|conf|bak|env)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Allow access to common file types
+<FilesMatch "\.(pdf|jpg|jpeg|png|gif|doc|docx|xls|xlsx)$">
+    Order allow,deny
+    Allow from all
+</FilesMatch>
+
+# Optional: Add headers for file downloads
+<IfModule mod_headers.c>
+    <FilesMatch "\.(pdf|doc|docx)$">
+        Header set Content-Disposition "attachment"
+    </FilesMatch>
+</IfModule>

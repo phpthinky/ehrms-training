@@ -195,8 +195,8 @@
                             <a href="{{ route('trainings.create') }}" class="btn btn-outline-primary text-start">
                                 <i class="bi bi-plus-circle me-2"></i>Create Training
                             </a>
-                            <a href="{{ route('public-files.create') }}" class="btn btn-outline-primary text-start">
-                                <i class="bi bi-upload me-2"></i>Upload Public File
+                            <a href="{{ route('hr-documents.create') }}" class="btn btn-outline-primary text-start">
+                                <i class="bi bi-shield-lock me-2"></i>Upload HR Document
                             </a>
                             <a href="{{ route('reports.index') }}" class="btn btn-outline-primary text-start">
                                 <i class="bi bi-file-bar-graph me-2"></i>Generate Report

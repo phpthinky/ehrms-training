@@ -4,16 +4,23 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class PublicFileController extends Controller
+class HRDocumentController extends Controller
 {
     public function index()
     {
-        return view('public-files.index');
+        $documents = \App\Models\PublicFile::with('uploader')
+            ->when(request('category'), function($q) {
+                $q->where('category', request('category'));
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        return view('hr-documents.index', compact('documents'));
     }
 
     public function create()
     {
-        return view('public-files.create');
+        return view('hr-documents.create');
     }
 
     public function store(Request $request)

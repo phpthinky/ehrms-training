@@ -492,9 +492,9 @@
                 @if(auth()->user()->isStaff())
                     <!-- Files & Reports -->
                     <div class="nav-section-title">Resources</div>
-                    <a href="{{ route('public-files.index') }}" class="nav-link {{ request()->routeIs('public-files.*') ? 'active' : '' }}">
-                        <i class="bi bi-folder"></i>
-                        <span class="nav-link-text">Public Files</span>
+                    <a href="{{ route('hr-documents.index') }}" class="nav-link {{ request()->routeIs('hr-documents.*') ? 'active' : '' }}">
+                        <i class="bi bi-shield-lock"></i>
+                        <span class="nav-link-text">HR Documents</span>
                     </a>
                     <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
                         <i class="bi bi-file-bar-graph"></i>
