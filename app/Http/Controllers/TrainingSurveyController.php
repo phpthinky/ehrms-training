@@ -30,7 +30,7 @@ class TrainingSurveyController extends Controller
 
         // Get all available topics
         $topics = TrainingTopic::where('is_active', true)
-            ->orderBy('name')
+            ->orderBy('title')
             ->get();
 
         return view('training-survey.form', compact('employee', 'existingSurvey', 'topics', 'currentYear'));

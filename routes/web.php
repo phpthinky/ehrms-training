@@ -10,7 +10,6 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\EmployeeFileController;
 use App\Http\Controllers\TrainingSurveyController;
-use App\Http\Controllers\EmployeeFileController;
 use App\Http\Controllers\TrainingAttendanceController;
 use App\Http\Controllers\HRDocumentController;
 use App\Http\Controllers\ProfileController;
@@ -42,6 +41,10 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
+    // Employee Files - View & Download (accessible to HR and Employees)
+    Route::get('employees/{employee}/files', [EmployeeFileController::class, 'index'])->name('employee-files.index');
+    Route::get('files/{file}/download', [EmployeeFileController::class, 'download'])->name('employee-files.download');
+    
     // HR Admin & Admin Assistant Routes
     Route::middleware(['role:hr_admin,admin_assistant'])->group(function () {
         
@@ -51,11 +54,9 @@ Route::middleware(['auth'])->group(function () {
         // Department Management
         Route::resource('departments', DepartmentController::class);
         
-        // Employee Files Management (201 Files)
-        Route::get('employees/{employee}/files', [EmployeeFileController::class, 'index'])->name('employee-files.index');
+        // Employee Files Management (201 Files) - Upload/Create/Delete (HR only)
         Route::get('employees/{employee}/files/create', [EmployeeFileController::class, 'create'])->name('employee-files.create');
         Route::post('employees/{employee}/files', [EmployeeFileController::class, 'store'])->name('employee-files.store');
-        Route::get('files/{file}/download', [EmployeeFileController::class, 'download'])->name('employee-files.download');
         Route::delete('files/{file}', [EmployeeFileController::class, 'destroy'])->name('employee-files.destroy');
         
         // Training Management
@@ -85,6 +86,7 @@ Route::middleware(['auth'])->group(function () {
         
         // HR Documents (Secure Files)
         Route::resource('hr-documents', HRDocumentController::class);
+        Route::get('hr-documents/{hrDocument}/download', [HRDocumentController::class, 'download'])->name('hr-documents.download');
         
         // Reports
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
@@ -94,7 +96,7 @@ Route::middleware(['auth'])->group(function () {
     // Employee Routes
     Route::middleware(['role:employee'])->group(function () {
         Route::get('/my-profile', [EmployeeController::class, 'myProfile'])->name('my-profile');
-        Route::get('/my-trainings', [TrainingController::class, 'myTrainings'])->name('my-trainings');
+        Route::get('/my-trainings', [EmployeeController::class, 'myTrainings'])->name('my-trainings');
         Route::get('/my-files', [EmployeeFileController::class, 'myFiles'])->name('my-files');
         
         // Training Surveys

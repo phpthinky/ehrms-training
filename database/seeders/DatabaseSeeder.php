@@ -187,6 +187,6 @@ class DatabaseSeeder extends Seeder
         $this->command->info('- hr_training_surveys');
         $this->command->info('- hr_messages');
         $this->command->info('- hr_notifications');
-        $this->command->info('- hr_public_files');
+        $this->command->info('- hr_documents');
     }
 }

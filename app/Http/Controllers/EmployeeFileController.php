@@ -17,9 +17,14 @@ class EmployeeFileController extends Controller
             $q->orderBy('created_at', 'desc');
         }, 'user', 'department'])->findOrFail($employeeId);
 
-        // Check authorization
-        if (!auth()->user()->isStaff() && auth()->user()->employee_id != $employee->id) {
-            abort(403, 'Unauthorized access');
+        // Check authorization - HR staff can view all, employees can view only their own
+        $user = auth()->user();
+        
+        if (!$user->isStaff()) {
+            // For employees, check if this is their own record
+            if (!$user->employee || $user->employee->id != $employee->id) {
+                abort(403, 'Unauthorized access');
+            }
         }
 
         // Group files by type
@@ -96,9 +101,14 @@ class EmployeeFileController extends Controller
     {
         $file = EmployeeFile::with('employee')->findOrFail($fileId);
         
-        // Check authorization
-        if (!auth()->user()->isStaff() && auth()->user()->employee_id != $file->employee_id) {
-            abort(403, 'Unauthorized access');
+        // Check authorization - HR staff can download all, employees can download only their own
+        $user = auth()->user();
+        
+        if (!$user->isStaff()) {
+            // For employees, check if this is their own file
+            if (!$user->employee || $user->employee->id != $file->employee_id) {
+                abort(403, 'Unauthorized access');
+            }
         }
 
         $filePath = public_path('uploads/' . $file->file_path);

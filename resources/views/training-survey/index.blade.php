@@ -138,7 +138,7 @@
                                             </td>
                                             <td>
                                                 @if($survey->topic)
-                                                    <span class="badge bg-primary-subtle text-primary">{{ $survey->topic->name }}</span>
+                                                    <span class="badge bg-primary-subtle text-primary">{{ $survey->topic->title }}</span>
                                                 @else
                                                     <span class="text-muted">-</span>
                                                 @endif

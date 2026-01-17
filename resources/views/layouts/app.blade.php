@@ -466,7 +466,7 @@
                         <i class="bi bi-file-earmark-text"></i>
                         <span class="nav-link-text">My 201 Files</span>
                     </a>
-                    <a href="{{ route('training-survey') }}" class="nav-link {{ request()->routeIs('training-survey') ? 'active' : '' }}">
+                    <a href="{{ route('training-survey.form') }}" class="nav-link {{ request()->routeIs('training-survey.form') ? 'active' : '' }}">
                         <i class="bi bi-clipboard-check"></i>
                         <span class="nav-link-text">Training Survey</span>
                     </a>

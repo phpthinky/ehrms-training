@@ -45,7 +45,7 @@
                                 <div class="d-flex flex-wrap gap-2 justify-content-center">
                                     @foreach($topicsList as $topic)
                                         <span class="badge bg-primary-subtle text-primary px-3 py-2">
-                                            <i class="bi bi-check2 me-1"></i>{{ $topic->name }}
+                                            <i class="bi bi-check2 me-1"></i>{{ $topic->title }}
                                         </span>
                                     @endforeach
                                 </div>
@@ -93,7 +93,7 @@
                                             <div class="form-check card p-3 h-100 border hover-shadow" style="transition: all 0.2s;">
                                                 <input class="form-check-input" type="checkbox" name="topics[]" value="{{ $topic->id }}" id="topic{{ $topic->id }}" {{ in_array($topic->id, old('topics', [])) ? 'checked' : '' }}>
                                                 <label class="form-check-label w-100" for="topic{{ $topic->id }}" style="cursor: pointer;">
-                                                    <div class="fw-semibold">{{ $topic->name }}</div>
+                                                    <div class="fw-semibold">{{ $topic->title }}</div>
                                                     @if($topic->description)
                                                         <small class="text-muted">{{ $topic->description }}</small>
                                                     @endif

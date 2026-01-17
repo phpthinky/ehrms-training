@@ -5,192 +5,193 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="mb-1" style="font-family: 'Outfit', sans-serif; font-weight: 600;">
-                <i class="bi bi-shield-lock text-primary me-2"></i>HR Documents
-            </h4>
-            <p class="text-muted mb-0">Secure document repository - HR Admin access only</p>
-        </div>
-        @if(auth()->user()->isStaff())
-            <a href="{{ route('hr-documents.create') }}" class="btn btn-primary">
-                <i class="bi bi-cloud-upload me-2"></i>Upload Document
-            </a>
-        @endif
-    </div>
-
-    <!-- Security Notice -->
-    <div class="alert alert-info border-0 mb-4" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));">
-        <div class="d-flex align-items-start">
-            <i class="bi bi-shield-check text-primary me-3" style="font-size: 1.5rem;"></i>
-            <div>
-                <strong class="d-block mb-1">Secure Document Storage</strong>
-                <small class="text-muted">
-                    @if(auth()->user()->isStaff())
-                        As HR Staff, you can upload and manage confidential HR documents. All documents are accessible only to authorized personnel.
-                    @else
-                        These documents are for reference only. Only HR Staff can upload or modify documents.
-                    @endif
-                </small>
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-1">Confidential HR Documents</h4>
+                    <p class="text-muted mb-0">Manage policies, memos, forms, and other HR documents</p>
+                </div>
+                <a href="{{ route('hr-documents.create') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Upload Document
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Filter Tabs -->
-    <ul class="nav nav-pills mb-4">
-        <li class="nav-item">
-            <button class="nav-link active" data-filter="all" onclick="filterDocuments('all')">
-                All Documents
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" data-filter="policy" onclick="filterDocuments('policy')">
-                Policies
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" data-filter="memo" onclick="filterDocuments('memo')">
-                Memos
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" data-filter="form" onclick="filterDocuments('form')">
-                Forms
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" data-filter="training" onclick="filterDocuments('training')">
-                Training Materials
-            </button>
-        </li>
-    </ul>
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
-    <!-- Documents Grid -->
-    <div class="row g-4">
-        @forelse($documents ?? [] as $document)
-            <div class="col-md-6 col-lg-4 col-xl-3">
-                <div class="card border-0 h-100" style="transition: all 0.3s;">
-                    <div class="card-body">
-                        <!-- File Icon -->
-                        <div class="text-center mb-3">
-                            <div class="file-icon mx-auto" style="width: 80px; height: 80px; background: linear-gradient(135deg, #3b82f6, #1e40af); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
-                                @php
-                                    $extension = strtolower(pathinfo($document->file_name ?? 'file.pdf', PATHINFO_EXTENSION));
-                                @endphp
-                                @if($extension === 'pdf')
-                                    <i class="bi bi-file-pdf text-white" style="font-size: 2.5rem;"></i>
-                                @elseif(in_array($extension, ['doc', 'docx']))
-                                    <i class="bi bi-file-word text-white" style="font-size: 2.5rem;"></i>
-                                @elseif(in_array($extension, ['xls', 'xlsx']))
-                                    <i class="bi bi-file-excel text-white" style="font-size: 2.5rem;"></i>
-                                @else
-                                    <i class="bi bi-file-earmark text-white" style="font-size: 2.5rem;"></i>
-                                @endif
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="icon-box bg-primary bg-opacity-10 rounded p-3">
+                                <i class="bi bi-files fs-4 text-primary"></i>
                             </div>
                         </div>
-
-                        <!-- File Info -->
-                        <h6 class="mb-2 text-truncate" title="{{ $document->title ?? 'Document' }}">
-                            {{ $document->title ?? 'Document' }}
-                        </h6>
-                        <p class="small text-muted mb-3">
-                            @if($document->category ?? false)
-                                <span class="badge bg-primary-subtle text-primary">{{ ucfirst($document->category) }}</span>
-                            @endif
-                        </p>
-
-                        @if($document->description ?? false)
-                            <p class="small text-muted mb-3">{{ Str::limit($document->description, 60) }}</p>
-                        @endif
-
-                        <!-- File Details -->
-                        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
-                            <small class="text-muted">
-                                <i class="bi bi-calendar3 me-1"></i>
-                                {{ isset($document->created_at) ? \Carbon\Carbon::parse($document->created_at)->format('M d, Y') : 'N/A' }}
-                            </small>
-                            <small class="text-muted">
-                                {{ $document->file_size ?? '0 KB' }}
-                            </small>
-                        </div>
-
-                        <!-- Actions -->
-                        <div class="d-grid gap-2">
-                            <a href="#" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-download me-1"></i>Download
-                            </a>
-                            @if(auth()->user()->isStaff())
-                                <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('hr-documents.edit', $document->id ?? 1) }}" class="btn btn-outline-secondary">
-                                        <i class="bi bi-pencil"></i> Edit
-                                    </a>
-                                    <button type="button" class="btn btn-outline-danger" onclick="confirmDelete({{ $document->id ?? 1 }})">
-                                        <i class="bi bi-trash"></i> Delete
-                                    </button>
-                                </div>
-                            @endif
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Total Documents</h6>
+                            <h3 class="mb-0">{{ $stats['total'] }}</h3>
                         </div>
                     </div>
                 </div>
             </div>
-        @empty
-            <div class="col-12">
-                <div class="card border-0">
-                    <div class="card-body text-center py-5">
-                        <div class="mb-4">
-                            <i class="bi bi-shield-lock" style="font-size: 5rem; opacity: 0.2;"></i>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="icon-box bg-info bg-opacity-10 rounded p-3">
+                                <i class="bi bi-shield-check fs-4 text-info"></i>
+                            </div>
                         </div>
-                        <h5 class="mb-2">No Documents Yet</h5>
-                        <p class="text-muted mb-4">
-                            @if(auth()->user()->isStaff())
-                                Start building your secure document library by uploading your first HR document.
-                            @else
-                                HR documents will appear here once uploaded by HR Staff.
-                            @endif
-                        </p>
-                        @if(auth()->user()->isStaff())
-                            <a href="{{ route('hr-documents.create') }}" class="btn btn-primary">
-                                <i class="bi bi-cloud-upload me-2"></i>Upload First Document
-                            </a>
-                        @endif
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Policies</h6>
+                            <h3 class="mb-0">{{ $stats['policies'] }}</h3>
+                        </div>
                     </div>
                 </div>
             </div>
-        @endforelse
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="icon-box bg-warning bg-opacity-10 rounded p-3">
+                                <i class="bi bi-envelope-paper fs-4 text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Memos</h6>
+                            <h3 class="mb-0">{{ $stats['memos'] }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="icon-box bg-success bg-opacity-10 rounded p-3">
+                                <i class="bi bi-file-earmark-text fs-4 text-success"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Forms</h6>
+                            <h3 class="mb-0">{{ $stats['forms'] }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="mb-0">All Documents</h5>
+        </div>
+        <div class="card-body p-0">
+            @if($documents->count() > 0)
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="5%"><i class="bi bi-file-earmark"></i></th>
+                                <th width="35%">Document Title</th>
+                                <th width="15%">Category</th>
+                                <th width="10%">File Size</th>
+                                <th width="15%">Uploaded By</th>
+                                <th width="10%">Date</th>
+                                <th width="10%" class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($documents as $document)
+                                <tr>
+                                    <td class="text-center">
+                                        <i class="{{ $document->file_icon }} fs-4"></i>
+                                    </td>
+                                    <td>
+                                        <div class="fw-medium">{{ $document->title }}</div>
+                                        @if($document->is_confidential)
+                                            <span class="badge badge-sm bg-danger-subtle text-danger mt-1">
+                                                <i class="bi bi-lock-fill"></i> Confidential
+                                            </span>
+                                        @endif
+                                        @if($document->description)
+                                            <div class="text-muted small mt-1">{{ Str::limit($document->description, 60) }}</div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ $document->category_color }}-subtle text-{{ $document->category_color }}">
+                                            {{ $document->category_label }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $document->formatted_size }}</td>
+                                    <td>{{ $document->uploader->name ?? 'Unknown' }}</td>
+                                    <td>{{ $document->created_at->format('M d, Y') }}</td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ route('hr-documents.show', $document) }}" 
+                                               class="btn btn-light" 
+                                               title="View">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ route('hr-documents.download', $document) }}" 
+                                               class="btn btn-light" 
+                                               title="Download">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                            <a href="{{ route('hr-documents.edit', $document) }}" 
+                                               class="btn btn-light" 
+                                               title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form action="{{ route('hr-documents.destroy', $document) }}" 
+                                                  method="POST" 
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Delete this document?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-light text-danger" title="Delete">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer bg-white border-0 py-3">
+                    {{ $documents->links() }}
+                </div>
+            @else
+                <div class="text-center py-5">
+                    <i class="bi bi-folder2-open text-muted" style="font-size: 4rem;"></i>
+                    <p class="text-muted mt-3">No documents uploaded yet</p>
+                    <a href="{{ route('hr-documents.create') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Upload First Document
+                    </a>
+                </div>
+            @endif
+        </div>
     </div>
 </div>
-
-@push('styles')
-<style>
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-</style>
-@endpush
-
-@push('scripts')
-<script>
-function filterDocuments(type) {
-    // Update active tab
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active');
-    });
-    document.querySelector(`[data-filter="${type}"]`).classList.add('active');
-    
-    // Filter logic (reload with parameter)
-    if (type !== 'all') {
-        window.location.href = "{{ route('hr-documents.index') }}?category=" + type;
-    } else {
-        window.location.href = "{{ route('hr-documents.index') }}";
-    }
-}
-
-function confirmDelete(id) {
-    if (confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
-        document.getElementById('delete-form-' + id).submit();
-    }
-}
-</script>
-@endpush
 @endsection

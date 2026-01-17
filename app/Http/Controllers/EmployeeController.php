@@ -150,7 +150,27 @@ class EmployeeController extends Controller
                 ->with('error', 'Employee profile not found.');
         }
 
-        $employee->load(['department', 'files', 'trainings']);
+        $employee->load(['department', 'files', 'trainings.training.topic']);
         return view('employees.profile', compact('employee'));
+    }
+
+    /**
+     * Employee's training history
+     */
+    public function myTrainings()
+    {
+        $employee = auth()->user()->employee;
+        
+        if (!$employee) {
+            return redirect()->route('dashboard')
+                ->with('error', 'No employee record found.');
+        }
+
+        $trainings = $employee->trainings()
+            ->with(['training.topic'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('employees.my-trainings', compact('employee', 'trainings'));
     }
 }

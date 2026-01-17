@@ -30,7 +30,7 @@
                         <div class="d-flex flex-wrap gap-2">
                             @foreach($topics as $topic)
                                 <span class="badge bg-primary px-3 py-2" style="font-size: 0.9rem;">
-                                    <i class="bi bi-check2 me-1"></i>{{ $topic->name }}
+                                    <i class="bi bi-check2 me-1"></i>{{ $topic->title }}
                                 </span>
                             @endforeach
                         </div>
