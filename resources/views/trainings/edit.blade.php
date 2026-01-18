@@ -184,7 +184,7 @@
                     </div>
                     <div class="d-flex justify-content-between">
                         <span class="text-muted small">Pending</span>
-                        <strong class="text-warning">{{ $training->attendances->where('attendance_status', 'pending')->count() }}</strong>
+                        <strong class="text-warning">{{ $training->attendances->where('attendance_status', 'registered')->count() }}</strong>
                     </div>
                 </div>
             </div>

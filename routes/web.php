@@ -90,6 +90,12 @@ Route::middleware(['auth'])->group(function () {
         
         // Reports
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/training', [ReportController::class, 'trainingReport'])->name('reports.training');
+        Route::get('reports/employee', [ReportController::class, 'employeeReport'])->name('reports.employee');
+        Route::get('reports/survey', [ReportController::class, 'surveyReport'])->name('reports.survey');
+        Route::get('reports/department', [ReportController::class, 'departmentReport'])->name('reports.department');
+        Route::get('reports/export/training', [ReportController::class, 'exportTrainingCSV'])->name('reports.export.training');
+        Route::get('reports/export/employee', [ReportController::class, 'exportEmployeeCSV'])->name('reports.export.employee');
         
     });
     

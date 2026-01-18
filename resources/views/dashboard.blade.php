@@ -342,7 +342,7 @@
                             <a href="{{ route('hr-documents.create') }}" class="btn btn-outline-primary text-start">
                                 <i class="bi bi-file-earmark-plus me-2"></i>Upload HR Document
                             </a>
-                            <a href="{{ route('training-survey.index') }}" class="btn btn-outline-primary text-start">
+                            <a href="{{ route('training-surveys.index') }}" class="btn btn-outline-primary text-start">
                                 <i class="bi bi-clipboard-data me-2"></i>View Survey Results
                             </a>
                             <a href="{{ route('departments.index') }}" class="btn btn-outline-primary text-start">

@@ -256,9 +256,10 @@
                                                             <div class="mb-3">
                                                                 <label class="form-label small">Status</label>
                                                                 <select name="attendance_status" class="form-select form-select-sm" required>
+                                                                    <option value="registered" {{ $attendance->attendance_status === 'registered' ? 'selected' : '' }}>Registered</option>
                                                                     <option value="attended" {{ $attendance->attendance_status === 'attended' ? 'selected' : '' }}>Attended</option>
                                                                     <option value="absent" {{ $attendance->attendance_status === 'absent' ? 'selected' : '' }}>Absent</option>
-                                                                    <option value="pending" {{ $attendance->attendance_status === 'pending' ? 'selected' : '' }}>Pending</option>
+                                                                    <option value="excused" {{ $attendance->attendance_status === 'excused' ? 'selected' : '' }}>Excused</option>
                                                                 </select>
                                                             </div>
                                                             <div class="mb-3">

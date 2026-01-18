@@ -148,22 +148,22 @@ class DashboardController extends Controller
 
         $attended = \DB::table('hr_training_attendance')
                       ->whereYear('created_at', $currentYear)
-                      ->where('status', 'attended')
+                      ->where('attendance_status', 'attended')
                       ->count();
 
         $absent = \DB::table('hr_training_attendance')
                     ->whereYear('created_at', $currentYear)
-                    ->where('status', 'absent')
+                    ->where('attendance_status', 'absent')
                     ->count();
 
-        $pending = \DB::table('hr_training_attendance')
+        $registered = \DB::table('hr_training_attendance')
                      ->whereYear('created_at', $currentYear)
-                     ->where('status', 'pending')
+                     ->where('attendance_status', 'registered')
                      ->count();
 
         return [
-            'labels' => ['Attended', 'Absent', 'Pending'],
-            'data' => [$attended, $absent, $pending],
+            'labels' => ['Attended', 'Absent', 'Registered'],
+            'data' => [$attended, $absent, $registered],
             'percentage' => $total > 0 ? round(($attended / $total) * 100, 1) : 0,
         ];
     }

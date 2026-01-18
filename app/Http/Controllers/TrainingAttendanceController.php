@@ -38,7 +38,7 @@ class TrainingAttendanceController extends Controller
         TrainingAttendance::create([
             'training_id' => $training->id,
             'employee_id' => $validated['employee_id'],
-            'attendance_status' => 'pending',
+            'attendance_status' => 'registered',
         ]);
 
         return back()->with('success', 'Employee added to training successfully.');
@@ -50,7 +50,7 @@ class TrainingAttendanceController extends Controller
     public function updateStatus(Request $request, TrainingAttendance $attendance)
     {
         $validated = $request->validate([
-            'attendance_status' => 'required|in:attended,absent,pending',
+            'attendance_status' => 'required|in:registered,attended,absent,excused',
             'remarks' => 'nullable|string|max:500',
         ]);
 
