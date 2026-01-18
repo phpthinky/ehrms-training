@@ -183,4 +183,44 @@ class TrainingSurveyController extends Controller
             'department_stats' => $departmentStats,
         ];
     }
+
+    /**
+     * HR view of all survey submissions
+     */
+    public function hrIndex()
+    {
+        $currentYear = date('Y');
+        
+        // Get survey statistics
+        $stats = $this->getSurveyStats($currentYear);
+        
+        // Get all submitted surveys with employee and topics
+        $surveys = TrainingSurvey::with(['employee.department', 'topics'])
+            ->where('year', $currentYear)
+            ->where('status', 'submitted')
+            ->orderBy('updated_at', 'desc')
+            ->get();
+        
+        // Get all topics with request counts
+        $topicCounts = [];
+        foreach ($surveys as $survey) {
+            foreach ($survey->topics as $topic) {
+                if (!isset($topicCounts[$topic->id])) {
+                    $topicCounts[$topic->id] = [
+                        'topic' => $topic,
+                        'count' => 0,
+                    ];
+                }
+                $topicCounts[$topic->id]['count']++;
+            }
+        }
+        
+        // Sort by count descending
+        usort($topicCounts, function($a, $b) {
+            return $b['count'] - $a['count'];
+        });
+        
+        return view('training-survey.hr-index', compact('surveys', 'stats', 'topicCounts', 'currentYear'));
+    }
 }
+

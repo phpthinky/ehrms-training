@@ -55,10 +55,21 @@ class TrainingController extends Controller
             $validated['requested_by'] = auth()->id();
         }
 
-        Training::create($validated);
+        $training = Training::create($validated);
+
+        // Send notifications to eligible employees
+        try {
+            $notifiedCount = NotificationController::notifyTrainingCreated($training);
+            $message = 'Training created successfully.';
+            if ($notifiedCount > 0) {
+                $message .= ' ' . $notifiedCount . ' employees notified.';
+            }
+        } catch (\Exception $e) {
+            $message = 'Training created successfully. (Notifications could not be sent)';
+        }
 
         return redirect()->route('trainings.index')
-            ->with('success', 'Training created successfully.');
+            ->with('success', $message);
     }
 
     /**

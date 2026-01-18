@@ -342,7 +342,7 @@
                             <a href="{{ route('hr-documents.create') }}" class="btn btn-outline-primary text-start">
                                 <i class="bi bi-file-earmark-plus me-2"></i>Upload HR Document
                             </a>
-                            <a href="{{ route('training-surveys.index') }}" class="btn btn-outline-primary text-start">
+                            <a href="{{ route('surveys.index') }}" class="btn btn-outline-primary text-start">
                                 <i class="bi bi-clipboard-data me-2"></i>View Survey Results
                             </a>
                             <a href="{{ route('departments.index') }}" class="btn btn-outline-primary text-start">
@@ -422,17 +422,17 @@
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <a href="{{ route('employees.profile') }}" class="btn btn-outline-primary w-100">
+                                <a href="{{ route('my-profile') }}" class="btn btn-outline-primary w-100">
                                     <i class="bi bi-person me-2"></i>My Profile
                                 </a>
                             </div>
                             <div class="col-md-3">
-                                <a href="{{ route('employees.my-trainings') }}" class="btn btn-outline-primary w-100">
+                                <a href="{{ route('my-trainings') }}" class="btn btn-outline-primary w-100">
                                     <i class="bi bi-journal-bookmark me-2"></i>My Trainings
                                 </a>
                             </div>
                             <div class="col-md-3">
-                                <a href="{{ route('employee-files.my-files') }}" class="btn btn-outline-primary w-100">
+                                <a href="{{ route('my-files') }}" class="btn btn-outline-primary w-100">
                                     <i class="bi bi-folder2-open me-2"></i>My 201 Files
                                 </a>
                             </div>

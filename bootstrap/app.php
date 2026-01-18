@@ -18,5 +18,18 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Custom handling for unauthenticated users
+        $exceptions->respond(function ($response, $exception, $request) {
+            if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
+                // Check if it's an AJAX request
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => 'Unauthenticated.'], 401);
+                }
+                
+                // For web requests, redirect to login without session expired message
+                return redirect()->guest(route('login'));
+            }
+            
+            return $response;
+        });
     })->create();

@@ -79,10 +79,8 @@ Route::middleware(['auth'])->group(function () {
             return redirect()->route('dashboard')->with('info', 'Feature coming soon');
         })->name('training-topics.index');
         
-        // Survey Results
-        Route::get('surveys', function() {
-            return redirect()->route('dashboard')->with('info', 'Feature coming soon');
-        })->name('surveys.index');
+        // Survey Results (HR View)
+        Route::get('surveys', [TrainingSurveyController::class, 'hrIndex'])->name('surveys.index');
         
         // HR Documents (Secure Files)
         Route::resource('hr-documents', HRDocumentController::class);
@@ -105,13 +103,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/my-trainings', [EmployeeController::class, 'myTrainings'])->name('my-trainings');
         Route::get('/my-files', [EmployeeFileController::class, 'myFiles'])->name('my-files');
         
-        // Training Surveys
-        Route::get('training-surveys', [TrainingSurveyController::class, 'index'])->name('training-surveys.index');
-        Route::get('training-surveys/{survey}', [TrainingSurveyController::class, 'show'])->name('training-surveys.show');
-        
-        // Training Survey (Employee)
+        // Training Survey Form (Employee only can submit)
         Route::get('/training-survey', [TrainingSurveyController::class, 'form'])->name('training-survey.form');
         Route::post('/training-survey', [TrainingSurveyController::class, 'submit'])->name('training-survey.submit');
+    });
+    
+    // Training Surveys (Both HR and Employees can view)
+    Route::middleware(['role:hr_admin,admin_assistant,employee'])->group(function () {
+        Route::get('training-surveys', [TrainingSurveyController::class, 'index'])->name('training-surveys.index');
+        Route::get('training-surveys/{survey}', [TrainingSurveyController::class, 'show'])->name('training-surveys.show');
     });
     
     // Messages (All authenticated users)
