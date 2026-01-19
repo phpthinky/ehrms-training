@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hr_survey_template_questions', function (Blueprint $table) {
+        Schema::create('survey_template_questions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('survey_template_id')->constrained('hr_survey_templates')->onDelete('cascade');
-            $table->foreignId('survey_question_id')->constrained('hr_survey_questions')->onDelete('cascade');
+            $table->foreignId('survey_template_id')->constrained('survey_templates')->onDelete('cascade');
+            $table->foreignId('survey_question_id')->constrained('survey_questions')->onDelete('cascade');
             $table->boolean('is_required')->default(false);
             $table->integer('order')->default(0);
             $table->json('custom_options')->nullable(); // Override default options
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hr_survey_template_questions');
+        Schema::dropIfExists('survey_template_questions');
     }
 };

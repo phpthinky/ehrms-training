@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hr_survey_responses', function (Blueprint $table) {
+        Schema::create('survey_responses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('survey_template_id')->constrained('hr_survey_templates')->onDelete('cascade');
-            $table->foreignId('employee_id')->constrained('hr_employees')->onDelete('cascade');
+            $table->foreignId('survey_template_id')->constrained('survey_templates')->onDelete('cascade');
+            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
             $table->json('response_data'); // All answers stored as JSON
             $table->enum('status', ['draft', 'submitted'])->default('draft');
             $table->timestamp('submitted_at')->nullable();
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hr_survey_responses');
+        Schema::dropIfExists('survey_responses');
     }
 };

@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hr_trainings', function (Blueprint $table) {
+        Schema::create('trainings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('training_topic_id')->nullable()->constrained('hr_training_topics')->onDelete('set null');
-            $table->foreignId('created_by')->constrained('hr_users')->onDelete('cascade');
+            $table->foreignId('training_topic_id')->nullable()->constrained('training_topics')->onDelete('set null');
+            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             
             $table->string('title');
             $table->text('description')->nullable();
@@ -31,7 +31,7 @@ return new class extends Migration
             $table->integer('duration_hours')->nullable();
             
             // External Training Specific
-            $table->foreignId('requested_by')->nullable()->constrained('hr_users')->onDelete('set null');
+            $table->foreignId('requested_by')->nullable()->constrained('users')->onDelete('set null');
             $table->enum('approval_status', ['pending', 'approved', 'rejected', 'completed'])->default('pending');
             $table->text('rejection_reason')->nullable();
             $table->date('approved_at')->nullable();
@@ -50,6 +50,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hr_trainings');
+        Schema::dropIfExists('trainings');
     }
 };

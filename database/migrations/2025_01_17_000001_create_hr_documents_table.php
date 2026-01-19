@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hr_documents', function (Blueprint $table) {
+        Schema::create('documents', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->enum('category', ['policy', 'memo', 'form', 'guideline', 'manual', 'template', 'report', 'letter', 'other'])->default('other');
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('file_type', 10)->nullable();
             $table->boolean('is_confidential')->default(false);
             $table->date('effective_date')->nullable();
-            $table->foreignId('uploaded_by')->constrained('hr_users')->onDelete('cascade');
+            $table->foreignId('uploaded_by')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hr_documents');
+        Schema::dropIfExists('documents');
     }
 };
