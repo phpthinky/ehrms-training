@@ -24,7 +24,95 @@ class ReportController extends Controller
             'totalSurveys' => TrainingSurvey::where('status', 'submitted')->count(),
         ];
 
-        return view('reports.index', compact('stats'));
+        // Chart Data
+        $chartData = $this->getChartData();
+
+        return view('reports.index', compact('stats', 'chartData'));
+    }
+
+    /**
+     * Get chart data for reports dashboard
+     */
+    private function getChartData()
+    {
+        $currentYear = date('Y');
+
+        // Training Trend - Monthly data
+        $trainingTrend = DB::table('trainings')
+            ->selectRaw('MONTH(start_date) as month, COUNT(*) as count')
+            ->whereYear('start_date', $currentYear)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->pluck('count', 'month')
+            ->toArray();
+
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $trainingTrendData = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $trainingTrendData[] = $trainingTrend[$i] ?? 0;
+        }
+
+        // Training Types Distribution
+        $trainingTypes = Training::selectRaw('type, COUNT(*) as count')
+            ->groupBy('type')
+            ->get();
+
+        $totalTrainings = $trainingTypes->sum('count');
+        $typeLabels = [];
+        $typeData = [];
+        foreach ($trainingTypes as $type) {
+            $typeLabels[] = ucfirst($type->type);
+            $typeData[] = $totalTrainings > 0 ? round(($type->count / $totalTrainings) * 100, 1) : 0;
+        }
+
+        // Department Training Distribution (Top 5)
+        $departmentTraining = DB::table('training_attendance')
+            ->join('employees', 'training_attendance.employee_id', '=', 'employees.id')
+            ->join('departments', 'employees.department_id', '=', 'departments.id')
+            ->selectRaw('departments.name, COUNT(DISTINCT training_attendance.employee_id) as count')
+            ->groupBy('departments.id', 'departments.name')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->get();
+
+        // Survey Response Rate by Department (Top 5)
+        $surveyResponse = DB::table('training_surveys')
+            ->join('employees', 'training_surveys.employee_id', '=', 'employees.id')
+            ->join('departments', 'employees.department_id', '=', 'departments.id')
+            ->where('training_surveys.status', 'submitted')
+            ->selectRaw('departments.name, COUNT(training_surveys.id) as responses, COUNT(DISTINCT employees.id) as total_employees')
+            ->groupBy('departments.id', 'departments.name')
+            ->orderByDesc('responses')
+            ->limit(5)
+            ->get();
+
+        $surveyLabels = [];
+        $surveyData = [];
+        foreach ($surveyResponse as $dept) {
+            $surveyLabels[] = $dept->name;
+            $employeesInDept = Employee::where('department_id', DB::table('departments')->where('name', $dept->name)->value('id'))->count();
+            $surveyData[] = $employeesInDept > 0 ? round(($dept->responses / $employeesInDept) * 100, 1) : 0;
+        }
+
+        return [
+            'trainingTrend' => [
+                'labels' => $months,
+                'data' => $trainingTrendData
+            ],
+            'trainingTypes' => [
+                'labels' => $typeLabels,
+                'data' => $typeData
+            ],
+            'departmentTraining' => [
+                'labels' => $departmentTraining->pluck('name')->toArray(),
+                'data' => $departmentTraining->pluck('count')->toArray()
+            ],
+            'surveyResponse' => [
+                'labels' => $surveyLabels,
+                'data' => $surveyData
+            ]
+        ];
     }
 
     /**

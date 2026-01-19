@@ -100,6 +100,65 @@
         </div>
     </div>
 
+    <!-- Charts Section -->
+    <div class="row g-4 mb-4">
+        <!-- Training Participation Chart -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Training Participation Trend
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="trainingTrendChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Type Distribution -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pie-chart me-2"></i>Training Types
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="trainingTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Training Distribution -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bar-chart me-2"></i>Top Departments by Training Participation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="departmentChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Survey Response Rate -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clipboard-check me-2"></i>Survey Response Rate by Department
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="surveyResponseChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Report Types -->
     <div class="row g-4">
         <!-- Training Report -->
@@ -283,3 +342,205 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+    // Chart colors
+    const colors = {
+        primary: '#1e40af',
+        success: '#059669',
+        warning: '#f59e0b',
+        info: '#0ea5e9',
+        danger: '#ef4444',
+        purple: '#8b5cf6',
+        pink: '#ec4899',
+        indigo: '#6366f1'
+    };
+
+    // Training Participation Trend Chart
+    const trainingTrendCtx = document.getElementById('trainingTrendChart').getContext('2d');
+    new Chart(trainingTrendCtx, {
+        type: 'line',
+        data: {
+            labels: @json($chartData['trainingTrend']['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']),
+            datasets: [{
+                label: 'Trainings Conducted',
+                data: @json($chartData['trainingTrend']['data'] ?? [5, 8, 12, 9, 15, 11, 14, 10, 13, 16, 12, 14]),
+                borderColor: colors.primary,
+                backgroundColor: colors.primary + '20',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 14
+                    },
+                    bodyFont: {
+                        size: 13
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Training Type Distribution Chart
+    const trainingTypeCtx = document.getElementById('trainingTypeChart').getContext('2d');
+    new Chart(trainingTypeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: @json($chartData['trainingTypes']['labels'] ?? ['Internal', 'External']),
+            datasets: [{
+                data: @json($chartData['trainingTypes']['data'] ?? [65, 35]),
+                backgroundColor: [colors.primary, colors.success],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Department Training Chart
+    const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+    new Chart(departmentCtx, {
+        type: 'bar',
+        data: {
+            labels: @json($chartData['departmentTraining']['labels'] ?? ['HR', 'IT', 'Finance', 'Operations', 'Admin']),
+            datasets: [{
+                label: 'Training Participants',
+                data: @json($chartData['departmentTraining']['data'] ?? [45, 38, 32, 28, 25]),
+                backgroundColor: colors.success,
+                borderRadius: 8,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Survey Response Chart
+    const surveyResponseCtx = document.getElementById('surveyResponseChart').getContext('2d');
+    new Chart(surveyResponseCtx, {
+        type: 'bar',
+        data: {
+            labels: @json($chartData['surveyResponse']['labels'] ?? ['HR', 'IT', 'Finance', 'Operations', 'Admin']),
+            datasets: [{
+                label: 'Response Rate (%)',
+                data: @json($chartData['surveyResponse']['data'] ?? [85, 78, 92, 65, 72]),
+                backgroundColor: colors.warning,
+                borderRadius: 8,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    callbacks: {
+                        label: function(context) {
+                            return 'Response Rate: ' + context.parsed.y + '%';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+</script>
+@endpush
