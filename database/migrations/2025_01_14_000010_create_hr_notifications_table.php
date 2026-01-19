@@ -14,15 +14,18 @@ return new class extends Migration
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            
+
             $table->string('type'); // training_approved, document_submitted, missing_document, etc.
             $table->string('title');
             $table->text('message');
             $table->json('data')->nullable(); // Additional data (IDs, links, etc.)
-            
+
+            $table->unsignedBigInteger('related_id')->nullable(); // ID of related entity (training, document, etc.)
+            $table->string('related_type')->nullable(); // Type of related entity (App\Models\Training, etc.)
+
             $table->boolean('is_read')->default(false);
             $table->timestamp('read_at')->nullable();
-            
+
             $table->timestamps();
         });
     }

@@ -138,7 +138,7 @@ class DashboardController extends Controller
     {
         $currentYear = date('Y');
         
-        $total = \DB::table('hr_training_attendance')
+        $total = \DB::table('training_attendance')
                     ->whereYear('created_at', $currentYear)
                     ->count();
 
@@ -146,17 +146,17 @@ class DashboardController extends Controller
             return ['labels' => [], 'data' => []];
         }
 
-        $attended = \DB::table('hr_training_attendance')
+        $attended = \DB::table('training_attendance')
                       ->whereYear('created_at', $currentYear)
                       ->where('attendance_status', 'attended')
                       ->count();
 
-        $absent = \DB::table('hr_training_attendance')
+        $absent = \DB::table('training_attendance')
                     ->whereYear('created_at', $currentYear)
                     ->where('attendance_status', 'absent')
                     ->count();
 
-        $registered = \DB::table('hr_training_attendance')
+        $registered = \DB::table('training_attendance')
                      ->whereYear('created_at', $currentYear)
                      ->where('attendance_status', 'registered')
                      ->count();
