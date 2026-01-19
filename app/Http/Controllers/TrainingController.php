@@ -140,4 +140,47 @@ class TrainingController extends Controller
 
         return view('trainings.my-trainings', compact('trainings'));
     }
+
+    /**
+     * Update training status (start/complete)
+     */
+    public function updateStatus(Request $request, Training $training)
+    {
+        $action = $request->input('action');
+        
+        // Validate status transition
+        if ($action === 'start' && $training->status !== 'upcoming') {
+            return redirect()->back()
+                ->with('error', 'Can only start upcoming trainings.');
+        }
+        
+        if ($action === 'complete' && $training->status !== 'ongoing') {
+            return redirect()->back()
+                ->with('error', 'Can only complete ongoing trainings.');
+        }
+
+        // Check if training date has arrived (for start action)
+        if ($action === 'start') {
+            $today = \Carbon\Carbon::today();
+            $startDate = \Carbon\Carbon::parse($training->start_date);
+            
+            if ($startDate->greaterThan($today)) {
+                $daysUntil = $today->diffInDays($startDate, false);
+                return redirect()->back()
+                    ->with('warning', 'Training is scheduled to start on ' . $startDate->format('M d, Y') . ' (' . abs($daysUntil) . ' days from now). Please wait until the training date arrives.');
+            }
+            
+            $training->status = 'ongoing';
+            $successMessage = 'Training started successfully!';
+        } elseif ($action === 'complete') {
+            $training->status = 'completed';
+            $successMessage = 'Training completed successfully!';
+        } else {
+            return redirect()->back()->with('error', 'Invalid action.');
+        }
+        
+        $training->save();
+        
+        return redirect()->back()->with('success', $successMessage);
+    }
 }

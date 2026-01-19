@@ -10,7 +10,7 @@ class Message extends Model
 {
     use HasFactory;
 
-    protected $table = 'hr_messages';
+    protected $table = 'messages';
 
     protected $fillable = [
         'sender_id',

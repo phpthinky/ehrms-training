@@ -10,7 +10,7 @@ class TrainingAttendance extends Model
 {
     use HasFactory;
 
-    protected $table = 'hr_training_attendance';
+    protected $table = 'training_attendance';
 
     protected $fillable = [
         'training_id',

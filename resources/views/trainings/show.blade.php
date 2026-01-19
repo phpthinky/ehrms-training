@@ -14,6 +14,27 @@
         </ol>
     </nav>
 
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if(session('warning'))
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>{{ session('warning') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <div class="row">
         <!-- Training Details -->
         <div class="col-lg-8">
@@ -388,10 +409,11 @@
                             </form>
                         @endif
                         
-                        @if($training->status === 'scheduled')
+                        @if($training->status === 'upcoming')
                             <hr class="my-2">
-                            <form action="#" method="POST" class="d-inline">
+                            <form action="{{ route('trainings.update-status', $training) }}" method="POST">
                                 @csrf
+                                <input type="hidden" name="action" value="start">
                                 <button type="submit" class="btn btn-outline-warning btn-sm w-100">
                                     <i class="bi bi-play-circle me-2"></i>Start Training
                                 </button>
@@ -400,9 +422,10 @@
                         
                         @if($training->status === 'ongoing')
                             <hr class="my-2">
-                            <form action="#" method="POST" class="d-inline">
+                            <form action="{{ route('trainings.update-status', $training) }}" method="POST">
                                 @csrf
-                                <button type="submit" class="btn btn-outline-secondary btn-sm w-100">
+                                <input type="hidden" name="action" value="complete">
+                                <button type="submit" class="btn btn-outline-success btn-sm w-100">
                                     <i class="bi bi-check-circle me-2"></i>Complete Training
                                 </button>
                             </form>

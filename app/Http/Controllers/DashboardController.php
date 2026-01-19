@@ -248,8 +248,21 @@ class DashboardController extends Controller
                 'myFilesCount' => 0,
                 'myPendingRequests' => 0,
                 'myUnreadMessages' => 0,
+                'upcomingTrainingAttendance' => collect(),
             ]);
         }
+
+        // Get upcoming trainings employee is registered for
+        $upcomingTrainingAttendance = $employee->trainings()
+            ->whereHas('training', function($query) {
+                $query->whereIn('status', ['upcoming', 'ongoing'])
+                      ->where('start_date', '>=', now()->subDays(3)) // Show 3 days before until it ends
+                      ->orderBy('start_date', 'asc');
+            })
+            ->whereIn('attendance_status', ['registered'])
+            ->with(['training'])
+            ->limit(5)
+            ->get();
 
         $data = [
             // Employee Statistics
@@ -269,6 +282,9 @@ class DashboardController extends Controller
             'unreadNotifications' => Notification::where('user_id', auth()->id())
                                                  ->where('is_read', false)
                                                  ->count(),
+            
+            // Upcoming training attendance reminders
+            'upcomingTrainingAttendance' => $upcomingTrainingAttendance,
         ];
 
         return view('dashboard', $data);

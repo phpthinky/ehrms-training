@@ -9,7 +9,7 @@ class HRDocument extends Model
 {
     use HasFactory;
 
-    protected $table = 'hr_documents';
+    protected $table = 'documents';
 
     protected $fillable = [
         'title',

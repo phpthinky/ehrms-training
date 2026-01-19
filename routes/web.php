@@ -61,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
         
         // Training Management
         Route::resource('trainings', TrainingController::class);
+        Route::post('trainings/{training}/update-status', [TrainingController::class, 'updateStatus'])->name('trainings.update-status');
         
         // Training Attendance Management
         Route::post('trainings/{training}/attendance', [TrainingAttendanceController::class, 'store'])->name('trainings.attendance.add');
@@ -78,6 +79,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('training-topics', function() {
             return redirect()->route('dashboard')->with('info', 'Feature coming soon');
         })->name('training-topics.index');
+        
+        // Training Programs CRUD
+        Route::resource('training-programs', TrainingProgramController::class);
+        Route::post('training-programs/reorder', [TrainingProgramController::class, 'reorder'])->name('training-programs.reorder');
         
         // Survey Results (HR View)
         Route::get('surveys', [TrainingSurveyController::class, 'hrIndex'])->name('surveys.index');

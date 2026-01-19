@@ -374,6 +374,49 @@
 
     @else
         <!-- Employee Dashboard -->
+        
+        {{-- Training Attendance Reminders --}}
+        @if(isset($upcomingTrainingAttendance) && $upcomingTrainingAttendance->count() > 0)
+            <div class="alert alert-danger border-0 shadow-sm mb-4" role="alert">
+                <div class="d-flex align-items-start">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 2rem;"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h5 class="alert-heading mb-2">
+                            <i class="bi bi-calendar-event me-2"></i>Training Attendance Required!
+                        </h5>
+                        <p class="mb-2">You are registered for the following upcoming training(s). Please mark your calendar and prepare to attend:</p>
+                        <ul class="mb-2">
+                            @foreach($upcomingTrainingAttendance as $attendance)
+                                <li class="mb-2">
+                                    <strong>{{ $attendance->training->title }}</strong>
+                                    <br>
+                                    <small>
+                                        <i class="bi bi-calendar me-1"></i>
+                                        {{ \Carbon\Carbon::parse($attendance->training->start_date)->format('M d, Y') }}
+                                        @if($attendance->training->start_date === now()->toDateString())
+                                            <span class="badge bg-white text-danger ms-2">TODAY!</span>
+                                        @elseif(\Carbon\Carbon::parse($attendance->training->start_date)->diffInDays(now()) <= 3)
+                                            <span class="badge bg-white text-warning ms-2">
+                                                In {{ \Carbon\Carbon::parse($attendance->training->start_date)->diffInDays(now()) }} days
+                                            </span>
+                                        @endif
+                                        • <i class="bi bi-geo-alt me-1"></i>{{ $attendance->training->venue }}
+                                        • <i class="bi bi-clock me-1"></i>
+                                        {{ \Carbon\Carbon::parse($attendance->training->start_time)->format('g:i A') }}
+                                    </small>
+                                </li>
+                            @endforeach
+                        </ul>
+                        <a href="{{ route('my-trainings') }}" class="btn btn-sm btn-light">
+                            <i class="bi bi-journal-bookmark me-2"></i>View All My Trainings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endif
+        
         <div class="row g-4">
             <div class="col-md-3">
                 <div class="card border-0 shadow-sm">

@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('hr_survey_templates', function (Blueprint $table) {
+            $table->id();
+            $table->integer('year');
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(false);
+            $table->foreignId('created_by')->constrained('hr_users');
+            $table->timestamps();
+            
+            $table->unique('year'); // Only one template per year
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('hr_survey_templates');
+    }
+};

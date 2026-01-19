@@ -12,7 +12,7 @@ class Training extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'hr_trainings';
+    protected $table = 'trainings';
 
     protected $fillable = [
         'training_topic_id',

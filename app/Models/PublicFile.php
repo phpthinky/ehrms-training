@@ -11,7 +11,7 @@ class PublicFile extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'hr_public_files';
+    protected $table = 'public_files';
 
     protected $fillable = [
         'uploaded_by',

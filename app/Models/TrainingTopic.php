@@ -10,7 +10,7 @@ class TrainingTopic extends Model
 {
     use HasFactory;
 
-    protected $table = 'hr_training_topics';
+    protected $table = 'training_topics';
 
     protected $fillable = [
         'title',

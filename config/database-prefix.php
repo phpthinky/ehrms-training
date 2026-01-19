@@ -13,6 +13,6 @@ return [
     |
     */
 
-    'prefix' => env('DB_PREFIX', 'hr_'),
+    'prefix' => env('DB_PREFIX', ''),
 
 ];
