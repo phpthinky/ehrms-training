@@ -15,6 +15,11 @@ use App\Http\Controllers\HRDocumentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\TrainingProgramController;
+use App\Http\Controllers\SurveyTemplateController;
+use App\Http\Controllers\SurveyQuestionController;
+use App\Http\Controllers\SurveyBuilderController;
+use App\Http\Controllers\SurveyResponseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,8 +88,33 @@ Route::middleware(['auth'])->group(function () {
         // Training Programs CRUD
         Route::resource('training-programs', TrainingProgramController::class);
         Route::post('training-programs/reorder', [TrainingProgramController::class, 'reorder'])->name('training-programs.reorder');
-        
-        // Survey Results (HR View)
+
+        // NEW SURVEY SYSTEM (Phase 1 Part 2)
+        // Survey Templates Management
+        Route::resource('survey-templates', SurveyTemplateController::class);
+        Route::post('survey-templates/{surveyTemplate}/toggle-active', [SurveyTemplateController::class, 'toggleActive'])->name('survey-templates.toggle-active');
+        Route::post('survey-templates/{surveyTemplate}/duplicate', [SurveyTemplateController::class, 'duplicate'])->name('survey-templates.duplicate');
+
+        // Survey Question Bank
+        Route::resource('survey-questions', SurveyQuestionController::class);
+        Route::get('survey-questions/{surveyQuestion}/preview', [SurveyQuestionController::class, 'preview'])->name('survey-questions.preview');
+
+        // Survey Builder (Form Builder)
+        Route::get('survey-builder/{surveyTemplate}', [SurveyBuilderController::class, 'index'])->name('survey-builder.index');
+        Route::post('survey-builder/{surveyTemplate}/add-question', [SurveyBuilderController::class, 'addQuestion'])->name('survey-builder.add-question');
+        Route::delete('survey-builder/{surveyTemplate}/questions/{surveyQuestion}', [SurveyBuilderController::class, 'removeQuestion'])->name('survey-builder.remove-question');
+        Route::put('survey-builder/{surveyTemplate}/questions/{surveyQuestion}', [SurveyBuilderController::class, 'updateQuestion'])->name('survey-builder.update-question');
+        Route::post('survey-builder/{surveyTemplate}/reorder', [SurveyBuilderController::class, 'reorderQuestions'])->name('survey-builder.reorder');
+        Route::post('survey-builder/{surveyTemplate}/add-defaults', [SurveyBuilderController::class, 'addDefaultQuestions'])->name('survey-builder.add-defaults');
+        Route::get('survey-builder/question/{surveyQuestion}', [SurveyBuilderController::class, 'getQuestion'])->name('survey-builder.get-question');
+
+        // Survey Response Analytics
+        Route::get('survey-responses/template/{surveyTemplate}', [SurveyResponseController::class, 'index'])->name('survey-responses.index');
+        Route::get('survey-responses/{surveyResponse}', [SurveyResponseController::class, 'show'])->name('survey-responses.show');
+        Route::get('survey-analytics/{surveyTemplate}', [SurveyResponseController::class, 'analytics'])->name('survey-responses.analytics');
+        Route::get('survey-analytics/{surveyTemplate}/export', [SurveyResponseController::class, 'export'])->name('survey-responses.export');
+
+        // Survey Results (HR View) - OLD SYSTEM
         Route::get('surveys', [TrainingSurveyController::class, 'hrIndex'])->name('surveys.index');
         
         // HR Documents (Secure Files)
@@ -108,9 +138,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/my-trainings', [EmployeeController::class, 'myTrainings'])->name('my-trainings');
         Route::get('/my-files', [EmployeeFileController::class, 'myFiles'])->name('my-files');
         
-        // Training Survey Form (Employee only can submit)
+        // Training Survey Form (Employee only can submit) - OLD SYSTEM
         Route::get('/training-survey', [TrainingSurveyController::class, 'form'])->name('training-survey.form');
         Route::post('/training-survey', [TrainingSurveyController::class, 'submit'])->name('training-survey.submit');
+
+        // NEW SURVEY SYSTEM - Employee Survey Submission
+        Route::get('/survey', [SurveyResponseController::class, 'showForm'])->name('survey.form');
+        Route::post('/survey/submit', [SurveyResponseController::class, 'submit'])->name('survey.submit');
+        Route::post('/survey/draft', [SurveyResponseController::class, 'saveDraft'])->name('survey.draft');
     });
     
     // Training Surveys (Both HR and Employees can view)
