@@ -173,7 +173,7 @@ class SimpleComprehensiveSeeder extends Seeder
         
         // Create admin user first
         $adminUser = User::firstOrCreate(
-            ['email' => 'admin@sablayan.gov.ph'],
+            ['email' => 'hradmin@sablayan.gov.ph'],
             [
                 'name' => 'Maria Santos',
                 'password' => Hash::make('password'),
