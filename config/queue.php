@@ -25,7 +25,7 @@ return [
         'database' => [
             'driver' => 'database',
             'connection' => env('DB_CONNECTION'),
-            'table' => env('DB_PREFIX', 'hr_') . 'jobs',
+            'table' => 'jobs',
             'queue' => 'default',
             'retry_after' => (int) env('QUEUE_RETRY_AFTER', 90),
             'after_commit' => false,
@@ -70,7 +70,7 @@ return [
 
     'batching' => [
         'database' => env('DB_CONNECTION', 'mysql'),
-        'table' => env('DB_PREFIX', 'hr_') . 'job_batches',
+        'table' => 'job_batches',
     ],
 
     /*
@@ -82,7 +82,7 @@ return [
     'failed' => [
         'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
         'database' => env('DB_CONNECTION', 'mysql'),
-        'table' => env('DB_PREFIX', 'hr_') . 'failed_jobs',
+        'table' => 'failed_jobs',
     ],
 
 ];

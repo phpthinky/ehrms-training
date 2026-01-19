@@ -27,7 +27,7 @@ return [
 
         'database' => [
             'driver' => 'database',
-            'table' => env('DB_PREFIX', 'hr_') . 'cache',
+            'table' => 'cache',
             'connection' => null,
             'lock_connection' => null,
         ],
