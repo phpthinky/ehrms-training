@@ -462,19 +462,30 @@ class SimpleComprehensiveSeeder extends Seeder
 
     private function createTrainingSurveys($employees, $topics)
     {
+        $otherTopicsSuggestions = [
+            'Advanced Excel training for data analysis',
+            'Leadership and team management',
+            'Effective communication skills',
+            'Time management and productivity',
+            'Customer service excellence',
+            null, // Some employees don't suggest additional topics
+            null,
+        ];
+
         // 2023 surveys
         $respondents2023 = $employees->random((int)($employees->count() * 0.70));
         foreach ($respondents2023 as $employee) {
             $selectedTopics = $topics->random(rand(3, 7))->pluck('id')->toArray();
-            
+            $submittedDate = Carbon::parse('2023-' . rand(1, 3) . '-' . rand(1, 28));
+
             TrainingSurvey::create([
                 'employee_id' => $employee->id,
                 'year' => 2023,
-                'additional_topics' => json_encode($selectedTopics),
-                'preferred_schedule' => ['weekday', 'weekend'][rand(0, 1)],
-                'preferred_format' => ['online', 'in-person', 'hybrid'][rand(0, 2)],
+                'selected_topics' => json_encode($selectedTopics),
+                'other_topics' => $otherTopicsSuggestions[array_rand($otherTopicsSuggestions)],
                 'status' => 'submitted',
-                'created_at' => Carbon::parse('2023-' . rand(1, 3) . '-' . rand(1, 28)),
+                'submitted_at' => $submittedDate,
+                'created_at' => $submittedDate,
             ]);
         }
 
@@ -482,15 +493,16 @@ class SimpleComprehensiveSeeder extends Seeder
         $respondents2024 = $employees->random((int)($employees->count() * 0.75));
         foreach ($respondents2024 as $employee) {
             $selectedTopics = $topics->random(rand(3, 7))->pluck('id')->toArray();
-            
+            $submittedDate = Carbon::parse('2024-' . rand(1, 12) . '-' . rand(1, 28));
+
             TrainingSurvey::create([
                 'employee_id' => $employee->id,
                 'year' => 2024,
-                'additional_topics' => json_encode($selectedTopics),
-                'preferred_schedule' => ['weekday', 'weekend'][rand(0, 1)],
-                'preferred_format' => ['online', 'in-person', 'hybrid'][rand(0, 2)],
+                'selected_topics' => json_encode($selectedTopics),
+                'other_topics' => $otherTopicsSuggestions[array_rand($otherTopicsSuggestions)],
                 'status' => 'submitted',
-                'created_at' => Carbon::parse('2024-' . rand(1, 12) . '-' . rand(1, 28)),
+                'submitted_at' => $submittedDate,
+                'created_at' => $submittedDate,
             ]);
         }
     }
