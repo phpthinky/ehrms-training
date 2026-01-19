@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hr_employee_files', function (Blueprint $table) {
+        Schema::create('employee_files', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('hr_employees')->onDelete('cascade');
-            $table->foreignId('uploaded_by')->constrained('hr_users')->onDelete('cascade');
+            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+            $table->foreignId('uploaded_by')->constrained('users')->onDelete('cascade');
             
             $table->string('file_name');
             $table->string('file_path');
@@ -36,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hr_employee_files');
+        Schema::dropIfExists('employee_files');
     }
 };

@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hr_training_surveys', function (Blueprint $table) {
+        Schema::create('training_surveys', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('hr_employees')->onDelete('cascade');
+            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
             $table->year('year');
             $table->json('selected_topics'); // Array of training_topic_ids
             $table->text('other_topics')->nullable(); // Free text for "Others"
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hr_training_surveys');
+        Schema::dropIfExists('training_surveys');
     }
 };

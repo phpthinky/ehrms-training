@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hr_training_attendance', function (Blueprint $table) {
+        Schema::create('training_attendance', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('training_id')->constrained('hr_trainings')->onDelete('cascade');
-            $table->foreignId('employee_id')->constrained('hr_employees')->onDelete('cascade');
+            $table->foreignId('training_id')->constrained('trainings')->onDelete('cascade');
+            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
             
             $table->enum('attendance_status', ['registered', 'attended', 'absent', 'excused'])->default('registered');
             $table->boolean('certificate_uploaded')->default(false);
-            $table->foreignId('certificate_file_id')->nullable()->constrained('hr_employee_files')->onDelete('set null');
+            $table->foreignId('certificate_file_id')->nullable()->constrained('employee_files')->onDelete('set null');
             
             $table->text('remarks')->nullable();
             $table->timestamp('attended_at')->nullable();
@@ -35,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hr_training_attendance');
+        Schema::dropIfExists('training_attendance');
     }
 };

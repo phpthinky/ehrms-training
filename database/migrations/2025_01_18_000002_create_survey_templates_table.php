@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hr_survey_templates', function (Blueprint $table) {
+        Schema::create('survey_templates', function (Blueprint $table) {
             $table->id();
             $table->integer('year');
             $table->string('title');
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(false);
-            $table->foreignId('created_by')->constrained('hr_users');
+            $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
             
             $table->unique('year'); // Only one template per year
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hr_survey_templates');
+        Schema::dropIfExists('survey_templates');
     }
 };

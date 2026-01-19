@@ -95,39 +95,20 @@ class SimpleComprehensiveSeeder extends Seeder
         
         try {
             DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-            
+
             // Delete in proper order (children first, then parents)
-            if (DB::table('notifications')->exists()) {
-                DB::table('notifications')->delete();
-            }
-            if (DB::table('documents')->exists()) {
-                DB::table('documents')->delete();
-            }
-            if (DB::table('employee_files')->exists()) {
-                DB::table('employee_files')->delete();
-            }
-            if (DB::table('training_surveys')->exists()) {
-                DB::table('training_surveys')->delete();
-            }
-            if (DB::table('training_attendance')->exists()) {
-                DB::table('training_attendance')->delete();
-            }
-            if (DB::table('trainings')->exists()) {
-                DB::table('trainings')->delete();
-            }
-            if (DB::table('training_topics')->exists()) {
-                DB::table('training_topics')->delete();
-            }
-            if (DB::table('employees')->exists()) {
-                DB::table('employees')->delete();
-            }
-            if (DB::table('users')->exists()) {
-                DB::table('users')->where('email', '!=', 'admin@sablayan.gov.ph')->delete();
-            }
-            if (DB::table('departments')->exists()) {
-                DB::table('departments')->delete();
-            }
-            
+            // DB::table() automatically uses the hr_ prefix from config
+            DB::table('notifications')->delete();
+            DB::table('documents')->delete();
+            DB::table('employee_files')->delete();
+            DB::table('training_surveys')->delete();
+            DB::table('training_attendance')->delete();
+            DB::table('trainings')->delete();
+            DB::table('training_topics')->delete();
+            DB::table('employees')->delete();
+            DB::table('users')->where('email', '!=', 'admin@sablayan.gov.ph')->delete();
+            DB::table('departments')->delete();
+
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         } catch (\Exception $e) {
             echo "⚠️  Note: Some tables may not exist yet (first run). Continuing...\n";
@@ -341,8 +322,8 @@ class SimpleComprehensiveSeeder extends Seeder
             $startDate = Carbon::parse('2023-' . rand(1, 12) . '-' . rand(1, 28));
             
             $training = Training::create([
-                'title' => $topic->name . ' Training 2023',
-                'description' => 'Comprehensive training on ' . strtolower($topic->name),
+                'title' => $topic->title . ' Training 2023',
+                'description' => 'Comprehensive training on ' . strtolower($topic->title),
                 'training_topic_id' => $topic->id,
                 'training_type' => rand(0, 1) ? 'internal' : 'external',
                 'venue' => 'LGU Sablayan Conference Hall',
@@ -375,8 +356,8 @@ class SimpleComprehensiveSeeder extends Seeder
             }
             
             $training = Training::create([
-                'title' => $topic->name . ' Training 2024',
-                'description' => 'Comprehensive training on ' . strtolower($topic->name),
+                'title' => $topic->title . ' Training 2024',
+                'description' => 'Comprehensive training on ' . strtolower($topic->title),
                 'training_topic_id' => $topic->id,
                 'training_type' => rand(0, 1) ? 'internal' : 'external',
                 'venue' => 'LGU Sablayan Conference Hall',
