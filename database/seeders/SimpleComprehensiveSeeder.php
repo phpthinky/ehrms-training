@@ -74,6 +74,7 @@ class SimpleComprehensiveSeeder extends Seeder
         echo "\n✅ Seeding Complete!\n";
         echo "📊 Summary:\n";
         echo "   - Departments: " . Department::count() . "\n";
+        echo "   - Users: " . User::count() . "\n";
         echo "   - Employees: " . Employee::count() . "\n";
         echo "   - Training Topics: " . TrainingTopic::count() . "\n";
         echo "   - Trainings: " . Training::count() . "\n";
@@ -83,7 +84,11 @@ class SimpleComprehensiveSeeder extends Seeder
         echo "   - HR Documents: " . HRDocument::count() . "\n";
         echo "   - Notifications: " . Notification::count() . "\n";
         echo "\n🎉 Database ready for demo!\n\n";
-        echo "Login: admin@sablayan.gov.ph / password\n\n";
+        echo "🔑 Login Credentials:\n";
+        echo "   HR Admin: admin@sablayan.gov.ph / password\n";
+        echo "   Admin Assistant: assistant@sablayan.gov.ph / password\n";
+        echo "   Guest: guest@sablayan.gov.ph / password\n";
+        echo "   (+ 50 employees with password: password)\n\n";
     }
 
     private function clearData()
@@ -209,6 +214,56 @@ class SimpleComprehensiveSeeder extends Seeder
         );
         $employees[] = $adminEmployee;
 
+        // Create Admin Assistant
+        $assistantUser = User::firstOrCreate(
+            ['email' => 'assistant@sablayan.gov.ph'],
+            [
+                'name' => 'Admin Assistant',
+                'password' => Hash::make('password'),
+                'role' => 'admin_assistant',
+                'status' => 'active',
+                'created_at' => Carbon::now()->subYears(2),
+            ]
+        );
+
+        $assistantEmployee = Employee::updateOrCreate(
+            ['employee_number' => 'EMP-2023-002'],
+            [
+                'user_id' => $assistantUser->id,
+                'employee_number' => 'EMP-2023-002',
+                'first_name' => 'Juan',
+                'middle_name' => 'Cruz',
+                'last_name' => 'Dela Cruz',
+                'suffix' => null,
+                'birth_date' => Carbon::parse('1990-03-20'),
+                'gender' => 'male',
+                'civil_status' => 'single',
+                'address' => 'Barangay Poblacion, Sablayan, Occidental Mindoro',
+                'mobile_number' => '09187654321',
+                'email' => 'assistant@sablayan.gov.ph',
+                'department_id' => $departments->firstWhere('code', 'HRMO')->id,
+                'position' => 'Admin Assistant V',
+                'employment_type' => 'permanent',
+                'date_hired' => Carbon::now()->subYears(5),
+                'rank_level' => 'normal',
+                'status' => 'active',
+                'created_at' => Carbon::now()->subYears(2),
+            ]
+        );
+        $employees[] = $assistantEmployee;
+
+        // Create Guest User (no employee record)
+        User::firstOrCreate(
+            ['email' => 'guest@sablayan.gov.ph'],
+            [
+                'name' => 'Guest User',
+                'password' => Hash::make('password'),
+                'role' => 'guest',
+                'status' => 'active',
+                'created_at' => Carbon::now()->subYears(1),
+            ]
+        );
+
         // Generate 49 more employees (all with user accounts)
         $firstNames = ['Juan', 'Maria', 'Jose', 'Ana', 'Pedro', 'Rosa', 'Carlos', 'Elena', 'Miguel', 'Sofia', 
                        'Luis', 'Carmen', 'Antonio', 'Isabel', 'Manuel', 'Teresa', 'Ricardo', 'Patricia'];
@@ -325,15 +380,16 @@ class SimpleComprehensiveSeeder extends Seeder
                 'title' => $topic->title . ' Training 2023',
                 'description' => 'Comprehensive training on ' . strtolower($topic->title),
                 'training_topic_id' => $topic->id,
-                'training_type' => rand(0, 1) ? 'internal' : 'external',
+                'created_by' => 1,
+                'type' => rand(0, 1) ? 'internal' : 'external',
+                'rank_level' => $topic->rank_level,
                 'venue' => 'LGU Sablayan Conference Hall',
                 'start_date' => $startDate,
                 'end_date' => $startDate->copy()->addDays(rand(1, 3)),
                 'start_time' => '08:00',
                 'end_time' => '17:00',
                 'facilitator' => 'Dr. Juan dela Cruz',
-                'target_participants' => rand(20, 40),
-                'training_hours' => rand(8, 24),
+                'duration_hours' => rand(8, 24),
                 'status' => 'completed',
                 'created_at' => $startDate->copy()->subDays(30),
             ]);
@@ -352,22 +408,23 @@ class SimpleComprehensiveSeeder extends Seeder
             } elseif ($startDate < $now->copy()->addDays(7)) {
                 $status = 'ongoing';
             } else {
-                $status = 'upcoming';
+                $status = 'scheduled';
             }
-            
+
             $training = Training::create([
                 'title' => $topic->title . ' Training 2024',
                 'description' => 'Comprehensive training on ' . strtolower($topic->title),
                 'training_topic_id' => $topic->id,
-                'training_type' => rand(0, 1) ? 'internal' : 'external',
+                'created_by' => 1,
+                'type' => rand(0, 1) ? 'internal' : 'external',
+                'rank_level' => $topic->rank_level,
                 'venue' => 'LGU Sablayan Conference Hall',
                 'start_date' => $startDate,
                 'end_date' => $startDate->copy()->addDays(rand(1, 3)),
                 'start_time' => '08:00',
                 'end_time' => '17:00',
                 'facilitator' => 'Prof. Maria Santos',
-                'target_participants' => rand(20, 40),
-                'training_hours' => rand(8, 24),
+                'duration_hours' => rand(8, 24),
                 'status' => $status,
                 'created_at' => $startDate->copy()->subDays(30),
             ]);
