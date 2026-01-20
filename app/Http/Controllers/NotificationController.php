@@ -33,7 +33,29 @@ class NotificationController extends Controller
             'read_at' => now(),
         ]);
 
+        // Return JSON for AJAX requests
+        if (request()->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
         return back()->with('success', 'Notification marked as read.');
+    }
+
+    /**
+     * Get unread notifications for dropdown (AJAX)
+     */
+    public function getUnread()
+    {
+        $notifications = Notification::where('user_id', auth()->id())
+            ->where('is_read', false)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        return response()->json([
+            'notifications' => $notifications,
+            'count' => $notifications->count(),
+        ]);
     }
 
     /**

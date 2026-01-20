@@ -477,6 +477,10 @@
                         <i class="bi bi-clipboard-data"></i>
                         <span class="nav-link-text">Survey Results</span>
                     </a>
+                    <a href="{{ route('training-recommendations') }}" class="nav-link {{ request()->routeIs('training-recommendations') ? 'active' : '' }}">
+                        <i class="bi bi-lightbulb"></i>
+                        <span class="nav-link-text">TNA Recommendations</span>
+                    </a>
 
                     <!-- Survey System -->
                     <div class="nav-section-title">Survey Management</div>
@@ -561,19 +565,43 @@
                 <h1 class="page-title">@yield('page-title', 'Dashboard')</h1>
 
                 <div class="header-actions">
-                    <div class="header-icon-btn" title="Notifications">
-                        <i class="bi bi-bell"></i>
-                        @if(isset($unreadNotifications) && $unreadNotifications > 0)
-                            <span class="badge rounded-pill">{{ $unreadNotifications }}</span>
-                        @endif
+                    <!-- Notifications Dropdown -->
+                    <div class="dropdown">
+                        <div class="header-icon-btn" data-bs-toggle="dropdown" id="notificationDropdown" title="Notifications" style="cursor: pointer;">
+                            <i class="bi bi-bell"></i>
+                            @if(isset($unreadNotifications) && $unreadNotifications > 0)
+                                <span class="badge rounded-pill" id="notification-count">{{ $unreadNotifications }}</span>
+                            @endif
+                        </div>
+                        <div class="dropdown-menu dropdown-menu-end shadow-lg" style="width: 350px; max-height: 500px; overflow-y: auto;">
+                            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                                <h6 class="mb-0 fw-bold">Notifications</h6>
+                                <form action="{{ route('notifications.mark-all-read') }}" method="POST" id="mark-all-read-form">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-link text-decoration-none p-0">Mark all as read</button>
+                                </form>
+                            </div>
+                            <div id="notification-list">
+                                <div class="text-center py-3 text-muted">
+                                    <div class="spinner-border spinner-border-sm" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ route('notifications.index') }}" class="dropdown-item text-center small text-primary">
+                                View All Notifications
+                            </a>
+                        </div>
                     </div>
 
-                    <div class="header-icon-btn" title="Messages">
+                    <!-- Messages Icon -->
+                    <a href="{{ route('messages.index') }}" class="header-icon-btn text-decoration-none" title="Messages">
                         <i class="bi bi-envelope"></i>
                         @if(isset($unreadMessages) && $unreadMessages > 0)
                             <span class="badge rounded-pill">{{ $unreadMessages }}</span>
                         @endif
-                    </div>
+                    </a>
 
                     <div class="dropdown">
                         <div class="user-profile" data-bs-toggle="dropdown">
@@ -688,6 +716,165 @@
             }, 250);
         });
     </script>
+
+    <!-- Notification Dropdown Script -->
+    @auth
+    <script>
+        // Load notifications when dropdown is opened
+        document.getElementById('notificationDropdown').addEventListener('click', function() {
+            loadNotifications();
+        });
+
+        function loadNotifications() {
+            const notificationList = document.getElementById('notification-list');
+
+            fetch('{{ route("notifications.unread") }}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.notifications.length === 0) {
+                        notificationList.innerHTML = `
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-bell-slash" style="font-size: 2rem; opacity: 0.3;"></i>
+                                <p class="mb-0 mt-2 small">No new notifications</p>
+                            </div>
+                        `;
+                    } else {
+                        let html = '';
+                        data.notifications.forEach(notification => {
+                            const timeAgo = getTimeAgo(notification.created_at);
+                            const icon = getNotificationIcon(notification.type);
+
+                            html += `
+                                <div class="dropdown-item notification-item ${notification.is_read ? 'read' : 'unread'}"
+                                     data-id="${notification.id}" style="cursor: pointer; border-left: 3px solid ${getNotificationColor(notification.type)};">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0 me-2">
+                                            <i class="bi ${icon}" style="font-size: 1.2rem; color: ${getNotificationColor(notification.type)};"></i>
+                                        </div>
+                                        <div class="flex-grow-1" style="min-width: 0;">
+                                            <h6 class="mb-1 small fw-semibold text-truncate">${notification.title}</h6>
+                                            <p class="mb-1 small text-muted" style="font-size: 0.85rem;">${notification.message}</p>
+                                            <small class="text-muted" style="font-size: 0.75rem;">
+                                                <i class="bi bi-clock me-1"></i>${timeAgo}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        notificationList.innerHTML = html;
+
+                        // Add click handlers to mark as read
+                        document.querySelectorAll('.notification-item').forEach(item => {
+                            item.addEventListener('click', function() {
+                                markAsRead(this.dataset.id);
+                            });
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading notifications:', error);
+                    notificationList.innerHTML = `
+                        <div class="text-center py-3 text-danger">
+                            <small>Failed to load notifications</small>
+                        </div>
+                    `;
+                });
+        }
+
+        function markAsRead(notificationId) {
+            fetch(`/notifications/${notificationId}/mark-read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update badge count
+                    const badge = document.getElementById('notification-count');
+                    if (badge) {
+                        const currentCount = parseInt(badge.textContent);
+                        if (currentCount > 1) {
+                            badge.textContent = currentCount - 1;
+                        } else {
+                            badge.remove();
+                        }
+                    }
+                    // Reload notifications
+                    loadNotifications();
+                }
+            });
+        }
+
+        // Mark all as read
+        document.getElementById('mark-all-read-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            fetch('{{ route("notifications.mark-all-read") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(() => {
+                const badge = document.getElementById('notification-count');
+                if (badge) badge.remove();
+                loadNotifications();
+            });
+        });
+
+        function getNotificationIcon(type) {
+            const icons = {
+                'document_uploaded': 'bi-file-earmark-arrow-up',
+                'training_created': 'bi-calendar-plus',
+                'training_updated': 'bi-calendar-event',
+                'training_registered': 'bi-check-circle',
+                'attendance_updated': 'bi-person-check',
+                'training': 'bi-mortarboard',
+                'enrollment': 'bi-bookmark-check',
+                'attendance': 'bi-clipboard-check',
+                'certificate': 'bi-award',
+                'survey': 'bi-clipboard-data'
+            };
+            return icons[type] || 'bi-bell';
+        }
+
+        function getNotificationColor(type) {
+            const colors = {
+                'document_uploaded': '#3b82f6',
+                'training_created': '#10b981',
+                'training_updated': '#f59e0b',
+                'training_registered': '#8b5cf6',
+                'attendance_updated': '#06b6d4',
+                'training': '#3b82f6',
+                'enrollment': '#10b981',
+                'attendance': '#f59e0b',
+                'certificate': '#eab308',
+                'survey': '#ec4899'
+            };
+            return colors[type] || '#64748b';
+        }
+
+        function getTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+
+            if (seconds < 60) return 'Just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            if (days < 7) return `${days}d ago`;
+            return date.toLocaleDateString();
+        }
+    </script>
+    @endauth
 
     @stack('scripts')
 </body>

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Training;
 use App\Models\TrainingTopic;
+use App\Models\TrainingSurvey;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TrainingController extends Controller
 {
@@ -182,5 +184,87 @@ class TrainingController extends Controller
         $training->save();
         
         return redirect()->back()->with('success', $successMessage);
+    }
+
+    /**
+     * Show training recommendations based on TNA (Training Needs Analysis)
+     */
+    public function recommendations(Request $request)
+    {
+        $year = $request->get('year', date('Y'));
+
+        // Aggregate selected topics from training_surveys
+        $topicCounts = [];
+
+        $surveys = TrainingSurvey::where('year', $year)
+            ->where('status', 'submitted')
+            ->get();
+
+        foreach ($surveys as $survey) {
+            $selectedTopics = json_decode($survey->selected_topics, true);
+
+            if (is_array($selectedTopics)) {
+                foreach ($selectedTopics as $topicId) {
+                    if (!isset($topicCounts[$topicId])) {
+                        $topicCounts[$topicId] = 0;
+                    }
+                    $topicCounts[$topicId]++;
+                }
+            }
+        }
+
+        // Sort by most requested
+        arsort($topicCounts);
+
+        // Get topic details with request counts
+        $recommendations = [];
+        foreach ($topicCounts as $topicId => $count) {
+            $topic = TrainingTopic::find($topicId);
+            if ($topic) {
+                $totalResponses = $surveys->count();
+                $percentage = $totalResponses > 0 ? round(($count / $totalResponses) * 100, 1) : 0;
+
+                // Check if there's already a training scheduled for this topic this year
+                $existingTraining = Training::where('training_topic_id', $topicId)
+                    ->whereYear('start_date', $year)
+                    ->exists();
+
+                $recommendations[] = [
+                    'topic' => $topic,
+                    'request_count' => $count,
+                    'percentage' => $percentage,
+                    'total_responses' => $totalResponses,
+                    'has_scheduled_training' => $existingTraining,
+                    'priority' => $this->calculatePriority($percentage, $existingTraining)
+                ];
+            }
+        }
+
+        // Get available years for filter
+        $availableYears = TrainingSurvey::selectRaw('DISTINCT year')
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        return view('trainings.recommendations', compact('recommendations', 'year', 'availableYears'));
+    }
+
+    /**
+     * Calculate priority level for training recommendation
+     */
+    private function calculatePriority($percentage, $hasScheduledTraining)
+    {
+        if ($hasScheduledTraining) {
+            return 'scheduled';
+        }
+
+        if ($percentage >= 70) {
+            return 'critical';
+        } elseif ($percentage >= 50) {
+            return 'high';
+        } elseif ($percentage >= 30) {
+            return 'medium';
+        } else {
+            return 'low';
+        }
     }
 }

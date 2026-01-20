@@ -65,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('files/{file}', [EmployeeFileController::class, 'destroy'])->name('employee-files.destroy');
         
         // Training Management
+        Route::get('training-recommendations', [TrainingController::class, 'recommendations'])->name('training-recommendations');
         Route::resource('trainings', TrainingController::class);
         Route::post('trainings/{training}/update-status', [TrainingController::class, 'updateStatus'])->name('trainings.update-status');
         
@@ -160,6 +161,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Notifications (All authenticated users)
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
     Route::post('notifications/{notification}/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
     Route::post('notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
     
