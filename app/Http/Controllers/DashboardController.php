@@ -105,6 +105,7 @@ class DashboardController extends Controller
     protected function getTopTrainingDepartment()
     {
         $currentYear = date('Y');
+        $prefix = DB::getTablePrefix();
 
         // Count trainings per department based on employee attendance
         $departmentTraining = DB::table('training_attendance')
@@ -112,7 +113,7 @@ class DashboardController extends Controller
             ->join('departments', 'employees.department_id', '=', 'departments.id')
             ->join('trainings', 'training_attendance.training_id', '=', 'trainings.id')
             ->whereYear('trainings.created_at', $currentYear)
-            ->select('departments.id', 'departments.name', DB::raw('COUNT(DISTINCT trainings.id) as training_count'))
+            ->select('departments.id', 'departments.name', DB::raw("COUNT(DISTINCT {$prefix}trainings.id) as training_count"))
             ->groupBy('departments.id', 'departments.name')
             ->orderByDesc('training_count')
             ->first();
