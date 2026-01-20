@@ -213,6 +213,85 @@
             </div>
         </div>
 
+        <!-- Insights Row - Top Department & Recommended Training -->
+        <div class="row g-4 mb-4">
+            <!-- Department with Highest Training Count -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-gradient text-white border-0 py-3" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                        <h5 class="mb-0" style="font-family: 'Outfit', sans-serif; font-weight: 600;">
+                            <i class="bi bi-trophy me-2"></i>Top Training Department
+                        </h5>
+                    </div>
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-building" style="font-size: 3rem; color: #6366f1; opacity: 0.3;"></i>
+                        </div>
+                        <h3 class="mb-2" style="font-family: 'Outfit', sans-serif; font-weight: 700; color: #6366f1;">
+                            {{ $topTrainingDepartment['name'] }}
+                        </h3>
+                        <p class="text-muted mb-3">Department with most trainings this year</p>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h4 class="mb-0 text-primary">{{ $topTrainingDepartment['count'] }}</h4>
+                                <small class="text-muted">Trainings</small>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="mb-0 text-success">{{ $topTrainingDepartment['percentage'] }}%</h4>
+                                <small class="text-muted">Of Total</small>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-gradient" style="width: {{ $topTrainingDepartment['percentage'] }}%; background: linear-gradient(90deg, #6366f1, #4f46e5);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Recommended Training from TNA -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-gradient text-white border-0 py-3" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <h5 class="mb-0" style="font-family: 'Outfit', sans-serif; font-weight: 600;">
+                            <i class="bi bi-star me-2"></i>Most Requested Training (TNA)
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0 me-3">
+                                <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-lightbulb text-white" style="font-size: 1.8rem;"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-2" style="font-weight: 600;">{{ $topRecommendedTraining['title'] }}</h5>
+                                @if($topRecommendedTraining['topic'])
+                                    <p class="text-muted small mb-3">{{ Str::limit($topRecommendedTraining['description'] ?? 'No description available', 100) }}</p>
+                                @endif
+                                <div class="d-flex align-items-center gap-3 flex-wrap">
+                                    <span class="badge bg-success-subtle text-success px-3 py-2">
+                                        <i class="bi bi-people me-1"></i>{{ $topRecommendedTraining['request_count'] }} requests
+                                    </span>
+                                    <span class="badge bg-info-subtle text-info px-3 py-2">
+                                        <i class="bi bi-graph-up me-1"></i>{{ $topRecommendedTraining['percentage'] }}% popularity
+                                    </span>
+                                </div>
+                                @if($topRecommendedTraining['topic'])
+                                    <div class="mt-3">
+                                        <a href="{{ route('training-topics.show', $topRecommendedTraining['topic']) }}" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-eye me-1"></i>View Topic Details
+                                        </a>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Department & Activity Row -->
         <div class="row g-4 mb-4">
             <!-- Department Distribution -->

@@ -8,7 +8,10 @@ use App\Models\TrainingSurvey;
 use App\Models\Department;
 use App\Models\Message;
 use App\Models\Notification;
+use App\Models\TrainingTopic;
+use App\Models\TrainingAttendance;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -85,9 +88,117 @@ class DashboardController extends Controller
 
             // Recent Activities
             'recentActivities' => $this->getRecentActivities(),
+
+            // Department with Highest Training Count
+            'topTrainingDepartment' => $this->getTopTrainingDepartment(),
+
+            // Top Recommended Training from TNA
+            'topRecommendedTraining' => $this->getTopRecommendedTraining(),
         ];
 
         return view('dashboard', $data);
+    }
+
+    /**
+     * Get department with the highest number of trainings conducted
+     */
+    protected function getTopTrainingDepartment()
+    {
+        $currentYear = date('Y');
+
+        // Count trainings per department based on employee attendance
+        $departmentTraining = DB::table('training_attendance')
+            ->join('employees', 'training_attendance.employee_id', '=', 'employees.id')
+            ->join('departments', 'employees.department_id', '=', 'departments.id')
+            ->join('trainings', 'training_attendance.training_id', '=', 'trainings.id')
+            ->whereYear('trainings.created_at', $currentYear)
+            ->select('departments.id', 'departments.name', DB::raw('COUNT(DISTINCT trainings.id) as training_count'))
+            ->groupBy('departments.id', 'departments.name')
+            ->orderByDesc('training_count')
+            ->first();
+
+        if (!$departmentTraining) {
+            return [
+                'name' => 'N/A',
+                'count' => 0,
+                'percentage' => 0
+            ];
+        }
+
+        // Calculate percentage against total trainings
+        $totalTrainings = Training::whereYear('created_at', $currentYear)->count();
+        $percentage = $totalTrainings > 0 ? round(($departmentTraining->training_count / $totalTrainings) * 100, 1) : 0;
+
+        return [
+            'name' => $departmentTraining->name,
+            'count' => $departmentTraining->training_count,
+            'percentage' => $percentage
+        ];
+    }
+
+    /**
+     * Get top recommended training based on Training Needs Analysis survey
+     */
+    protected function getTopRecommendedTraining()
+    {
+        $currentYear = date('Y');
+
+        // Aggregate selected topics from training_surveys
+        $topicCounts = [];
+
+        $surveys = TrainingSurvey::where('year', $currentYear)
+            ->where('status', 'submitted')
+            ->get();
+
+        foreach ($surveys as $survey) {
+            $selectedTopics = json_decode($survey->selected_topics, true);
+
+            if (is_array($selectedTopics)) {
+                foreach ($selectedTopics as $topicId) {
+                    if (!isset($topicCounts[$topicId])) {
+                        $topicCounts[$topicId] = 0;
+                    }
+                    $topicCounts[$topicId]++;
+                }
+            }
+        }
+
+        if (empty($topicCounts)) {
+            return [
+                'title' => 'No data available',
+                'topic' => null,
+                'request_count' => 0,
+                'percentage' => 0
+            ];
+        }
+
+        // Get the topic with most requests
+        arsort($topicCounts);
+        $topTopicId = array_key_first($topicCounts);
+        $requestCount = $topicCounts[$topTopicId];
+
+        $topic = TrainingTopic::find($topTopicId);
+
+        if (!$topic) {
+            return [
+                'title' => 'No data available',
+                'topic' => null,
+                'request_count' => 0,
+                'percentage' => 0
+            ];
+        }
+
+        // Calculate percentage
+        $totalResponses = $surveys->count();
+        $percentage = $totalResponses > 0 ? round(($requestCount / $totalResponses) * 100, 1) : 0;
+
+        return [
+            'title' => $topic->title,
+            'topic' => $topic,
+            'request_count' => $requestCount,
+            'percentage' => $percentage,
+            'description' => $topic->description
+        ];
     }
 
     /**
