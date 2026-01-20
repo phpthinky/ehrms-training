@@ -477,6 +477,17 @@
                         <i class="bi bi-clipboard-data"></i>
                         <span class="nav-link-text">Survey Results</span>
                     </a>
+
+                    <!-- Survey System -->
+                    <div class="nav-section-title">Survey Management</div>
+                    <a href="{{ route('survey-templates.index') }}" class="nav-link {{ request()->routeIs('survey-templates.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-text"></i>
+                        <span class="nav-link-text">Survey Templates</span>
+                    </a>
+                    <a href="{{ route('survey-questions.index') }}" class="nav-link {{ request()->routeIs('survey-questions.*') ? 'active' : '' }}">
+                        <i class="bi bi-question-circle"></i>
+                        <span class="nav-link-text">Question Bank</span>
+                    </a>
                 @else
                     <!-- Employee View -->
                     <div class="nav-section-title">My Records</div>
@@ -492,9 +503,16 @@
                         <i class="bi bi-file-earmark-text"></i>
                         <span class="nav-link-text">My 201 Files</span>
                     </a>
+
+                    <!-- Survey -->
+                    <div class="nav-section-title">Surveys</div>
                     <a href="{{ route('training-survey.form') }}" class="nav-link {{ request()->routeIs('training-survey.form') ? 'active' : '' }}">
                         <i class="bi bi-clipboard-check"></i>
                         <span class="nav-link-text">Training Survey</span>
+                    </a>
+                    <a href="{{ route('survey-responses.form') }}" class="nav-link {{ request()->routeIs('survey-responses.*') ? 'active' : '' }}">
+                        <i class="bi bi-card-checklist"></i>
+                        <span class="nav-link-text">Annual Survey</span>
                     </a>
                 @endif
 

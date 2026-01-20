@@ -6,6 +6,7 @@ use App\Models\SurveyTemplate;
 use App\Models\SurveyResponse;
 use App\Models\Employee;
 use App\Models\TrainingProgram;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -157,17 +158,36 @@ class SurveyResponseController extends Controller
     /**
      * Analytics dashboard (HR only)
      */
-    public function analytics(SurveyTemplate $surveyTemplate)
+    public function analytics(Request $request, SurveyTemplate $surveyTemplate)
     {
         $surveyTemplate->load(['questions' => function ($query) {
             $query->orderByPivot('order');
         }]);
 
-        // Get all responses
-        $responses = SurveyResponse::where('survey_template_id', $surveyTemplate->id)
+        // Get all responses with filters
+        $query = SurveyResponse::where('survey_template_id', $surveyTemplate->id)
             ->where('status', 'submitted')
-            ->with('employee.department')
-            ->get();
+            ->with('employee.department');
+
+        // Apply filters
+        if ($request->filled('start_date')) {
+            $query->whereDate('submitted_at', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('submitted_at', '<=', $request->end_date);
+        }
+
+        if ($request->filled('department_id')) {
+            $query->whereHas('employee', function ($q) use ($request) {
+                $q->where('department_id', $request->department_id);
+            });
+        }
+
+        $responses = $query->get();
+
+        // Get all departments for filter dropdown
+        $departments = Department::orderBy('name')->get();
 
         // Calculate statistics
         $totalEmployees = Employee::where('status', 'active')->count();
@@ -244,7 +264,8 @@ class SurveyResponseController extends Controller
             'responseRate',
             'byDepartment',
             'questionAnalysis',
-            'trainingPrograms'
+            'trainingPrograms',
+            'departments'
         ));
     }
 

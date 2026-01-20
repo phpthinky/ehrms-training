@@ -17,6 +17,65 @@
         </div>
     </div>
 
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Filter Results</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{{ route('survey-analytics', $surveyTemplate) }}">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Department</label>
+                        <select name="department_id" class="form-select">
+                            <option value="">All Departments</option>
+                            @foreach($departments as $dept)
+                                <option value="{{ $dept->id }}" {{ request('department_id') == $dept->id ? 'selected' : '' }}>
+                                    {{ $dept->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-2"></i>Filter
+                        </button>
+                        @if(request()->hasAny(['start_date', 'end_date', 'department_id']))
+                            <a href="{{ route('survey-analytics', $surveyTemplate) }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i>
+                            </a>
+                        @endif
+                    </div>
+                </div>
+                @if(request()->hasAny(['start_date', 'end_date', 'department_id']))
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Showing filtered results
+                            @if(request('start_date'))
+                                from {{ request('start_date') }}
+                            @endif
+                            @if(request('end_date'))
+                                to {{ request('end_date') }}
+                            @endif
+                            @if(request('department_id'))
+                                for {{ $departments->find(request('department_id'))->name ?? 'selected department' }}
+                            @endif
+                        </small>
+                    </div>
+                @endif
+            </form>
+        </div>
+    </div>
+
     <!-- Overview Statistics -->
     <div class="row mb-4">
         <div class="col-md-4">
