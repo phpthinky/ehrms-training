@@ -160,7 +160,7 @@ class EmployeeController extends Controller
     public function myTrainings()
     {
         $employee = auth()->user()->employee;
-        
+
         if (!$employee) {
             return redirect()->route('dashboard')
                 ->with('error', 'No employee record found.');
@@ -172,5 +172,30 @@ class EmployeeController extends Controller
             ->get();
 
         return view('employees.my-trainings', compact('employee', 'trainings'));
+    }
+
+    /**
+     * View employee's trainings attended (HR Admin view)
+     */
+    public function trainings(Employee $employee)
+    {
+        // Check authorization - HR staff can view all, employees can view only their own
+        $user = auth()->user();
+
+        if (!$user->isStaff()) {
+            // For employees, check if this is their own record
+            if (!$user->employee || $user->employee->id != $employee->id) {
+                abort(403, 'Unauthorized access');
+            }
+        }
+
+        $employee->load(['user', 'department']);
+
+        $trainings = $employee->trainings()
+            ->with(['training.topic'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('employees.trainings', compact('employee', 'trainings'));
     }
 }

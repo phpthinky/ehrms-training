@@ -49,7 +49,10 @@ Route::middleware(['auth'])->group(function () {
     // Employee Files - View & Download (accessible to HR and Employees)
     Route::get('employees/{employee}/files', [EmployeeFileController::class, 'index'])->name('employee-files.index');
     Route::get('files/{file}/download', [EmployeeFileController::class, 'download'])->name('employee-files.download');
-    
+
+    // Employee Trainings - View trainings attended (accessible to HR and Employees)
+    Route::get('employees/{employee}/trainings', [EmployeeController::class, 'trainings'])->name('employees.trainings');
+
     // HR Admin & Admin Assistant Routes
     Route::middleware(['role:hr_admin,admin_assistant'])->group(function () {
         
