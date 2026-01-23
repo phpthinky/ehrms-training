@@ -60,7 +60,7 @@ class TrainingSurveyController extends Controller
 
         $validated = $request->validate([
             'topics' => 'required|array|min:1|max:5',
-            'topics.*' => 'exists:hr_training_topics,id',
+            'topics.*' => 'exists:training_topics,id',
             'additional_topics' => 'nullable|string|max:1000',
             'preferred_schedule' => 'nullable|in:weekday_morning,weekday_afternoon,weekend,any',
             'preferred_format' => 'nullable|in:in_person,online,hybrid,any',

@@ -40,7 +40,7 @@ class TrainingController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'type' => 'required|in:internal,external',
-            'training_topic_id' => 'nullable|exists:hr_training_topics,id',
+            'training_topic_id' => 'nullable|exists:training_topics,id',
             'venue' => 'nullable|string|max:255',
             'facilitator' => 'nullable|string|max:255',
             'start_date' => 'required|date',

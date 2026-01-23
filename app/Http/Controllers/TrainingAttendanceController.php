@@ -17,7 +17,7 @@ class TrainingAttendanceController extends Controller
     public function store(Request $request, Training $training)
     {
         $validated = $request->validate([
-            'employee_id' => 'required|exists:hr_employees,id',
+            'employee_id' => 'required|exists:employees,id',
         ]);
 
         // Check if already exists
@@ -131,7 +131,7 @@ class TrainingAttendanceController extends Controller
     {
         $validated = $request->validate([
             'attendances' => 'required|array',
-            'attendances.*.id' => 'required|exists:hr_training_attendance,id',
+            'attendances.*.id' => 'required|exists:training_attendance,id',
             'attendances.*.status' => 'required|in:attended,absent,pending',
         ]);
 
