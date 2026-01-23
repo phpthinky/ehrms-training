@@ -110,9 +110,13 @@
                                                         <i class="bi bi-calendar3 me-1"></i>{{ $file->created_at->format('M d, Y') }}
                                                         <span class="mx-2">•</span>
                                                         <i class="bi bi-hdd me-1"></i>{{ number_format($file->file_size / 1024, 2) }} KB
-                                                        @if($file->remarks)
+                                                        @if($file->file_category)
                                                             <span class="mx-2">•</span>
-                                                            {{ Str::limit($file->remarks, 50) }}
+                                                            <span class="badge bg-secondary-subtle text-secondary">{{ ucwords(str_replace('_', ' ', $file->file_category)) }}</span>
+                                                        @endif
+                                                        @if($file->description)
+                                                            <span class="mx-2">•</span>
+                                                            {{ Str::limit($file->description, 50) }}
                                                         @endif
                                                     </div>
                                                 </div>
