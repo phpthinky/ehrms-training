@@ -157,6 +157,41 @@ class EmployeeController extends Controller
     }
 
     /**
+     * Resend password to employee email
+     */
+    public function resendPassword(Employee $employee)
+    {
+        // Check if user is HR Admin
+        if (!auth()->user()->isHRAdmin()) {
+            return back()->with('error', 'Unauthorized action.');
+        }
+
+        // Check if employee has a user account
+        if (!$employee->user_id) {
+            return back()->with('error', 'This employee does not have a user account.');
+        }
+
+        // Generate new random password
+        $randomPassword = Str::password(12, true, true, false);
+
+        // Update user password
+        $user = User::find($employee->user_id);
+        $user->password = Hash::make($randomPassword);
+        $user->save();
+
+        // Send welcome email with new credentials
+        try {
+            Mail::to($employee->email)->send(new WelcomeEmployee($employee, $randomPassword));
+            $emailStatus = 'Password reset and email sent successfully to ' . $employee->email;
+        } catch (\Exception $e) {
+            $emailStatus = 'Password updated but email failed to send. New password: ' . $randomPassword;
+            \Log::error('Failed to resend password email: ' . $e->getMessage());
+        }
+
+        return back()->with('success', $emailStatus);
+    }
+
+    /**
      * Show employee's profile (for employees viewing their own)
      */
     public function myProfile()

@@ -55,8 +55,9 @@ Route::middleware(['auth'])->group(function () {
 
     // HR Admin & Admin Assistant Routes
     Route::middleware(['role:hr_admin,admin_assistant'])->group(function () {
-        
+
         // Employee Management
+        Route::post('employees/{employee}/resend-password', [EmployeeController::class, 'resendPassword'])->name('employees.resend-password');
         Route::resource('employees', EmployeeController::class);
         
         // Department Management
@@ -83,12 +84,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('trainings/{training}/attendance/notify', [TrainingAttendanceController::class, 'sendNotifications'])->name('trainings.attendance.notify');
         Route::get('trainings/{training}/attendance/eligible', [TrainingAttendanceController::class, 'getEligibleEmployees'])->name('trainings.attendance.eligible');
         Route::get('trainings/{training}/attendance/export', [TrainingAttendanceController::class, 'exportAttendance'])->name('trainings.attendance.export');
-        
-        // Training Topics
-        Route::get('training-topics', function() {
-            return redirect()->route('dashboard')->with('info', 'Feature coming soon');
-        })->name('training-topics.index');
-        
+
         // Training Programs CRUD
         Route::resource('training-programs', TrainingProgramController::class);
         Route::post('training-programs/reorder', [TrainingProgramController::class, 'reorder'])->name('training-programs.reorder');
