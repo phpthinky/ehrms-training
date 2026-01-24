@@ -145,8 +145,13 @@
                     </div>
 
                     <div class="mb-3">
-                        <small class="text-muted d-block mb-1">Email</small>
-                        <strong>{{ $employee->email ?? $employee->user->email ?? 'N/A' }}</strong>
+                        <label class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                        <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
+                               value="{{ old('email', $employee->email ?? $employee->user->email ?? '') }}" required>
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Email will be used for login and notifications</small>
                     </div>
 
                     <div class="mb-3">
@@ -155,7 +160,7 @@
                     </div>
 
                     <div class="alert alert-warning alert-sm mb-0">
-                        <small><i class="bi bi-exclamation-triangle me-2"></i><strong>Note:</strong> Employee number and email cannot be changed here.</small>
+                        <small><i class="bi bi-exclamation-triangle me-2"></i><strong>Note:</strong> Employee number cannot be changed after creation.</small>
                     </div>
                 </div>
             </div>
