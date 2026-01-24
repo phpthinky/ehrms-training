@@ -10,9 +10,11 @@
             <h4 class="mb-1" style="font-family: 'Outfit', sans-serif; font-weight: 600;">Departments</h4>
             <p class="text-muted mb-0">Manage organizational departments</p>
         </div>
-        <a href="{{ route('departments.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-2"></i>Add Department
-        </a>
+        @if(auth()->user()->isHRAdmin())
+            <a href="{{ route('departments.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Add Department
+            </a>
+        @endif
     </div>
 
     <div class="row g-4">

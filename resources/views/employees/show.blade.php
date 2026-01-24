@@ -47,6 +47,14 @@
                         <a href="{{ route('employees.edit', $employee) }}" class="btn btn-outline-primary">
                             <i class="bi bi-pencil me-2"></i>Edit Profile
                         </a>
+                        @if(auth()->user()->isHRAdmin() && $employee->user_id)
+                            <form action="{{ route('employees.resend-password', $employee) }}" method="POST" onsubmit="return confirm('Are you sure you want to reset and resend the password for this employee?')">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-warning w-100">
+                                    <i class="bi bi-envelope-paper me-2"></i>Resend Password
+                                </button>
+                            </form>
+                        @endif
                         <a href="{{ route('employees.index') }}" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left me-2"></i>Back to List
                         </a>

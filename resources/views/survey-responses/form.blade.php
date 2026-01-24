@@ -33,7 +33,7 @@
 
                                 @php
                                     $fieldName = 'question_' . $question->id;
-                                    $oldValue = old($fieldName, $existingResponse->response_data[$question->id] ?? null);
+                                    $oldValue = old($fieldName, ($existingResponse && $existingResponse->response_data) ? ($existingResponse->response_data[$question->id] ?? null) : null);
                                 @endphp
 
                                 @if($question->question_type === 'training_programs')
