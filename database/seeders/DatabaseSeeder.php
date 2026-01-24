@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             SimpleComprehensiveSeeder::class,
+            SurveyQuestionSeeder::class,
         ]);
     }
 }

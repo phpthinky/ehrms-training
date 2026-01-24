@@ -44,7 +44,7 @@ class SurveyTemplateController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'year' => 'required|integer|unique:hr_survey_templates,year',
+            'year' => 'required|integer|unique:survey_templates,year',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
@@ -109,7 +109,7 @@ class SurveyTemplateController extends Controller
     public function update(Request $request, SurveyTemplate $surveyTemplate)
     {
         $validated = $request->validate([
-            'year' => 'required|integer|unique:hr_survey_templates,year,' . $surveyTemplate->id,
+            'year' => 'required|integer|unique:survey_templates,year,' . $surveyTemplate->id,
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
@@ -175,7 +175,7 @@ class SurveyTemplateController extends Controller
     public function duplicate(Request $request, SurveyTemplate $surveyTemplate)
     {
         $validated = $request->validate([
-            'year' => 'required|integer|unique:hr_survey_templates,year',
+            'year' => 'required|integer|unique:survey_templates,year',
         ]);
 
         $newTemplate = SurveyTemplate::create([

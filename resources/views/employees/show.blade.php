@@ -60,15 +60,19 @@
                     <h6 class="mb-3" style="font-weight: 600;">Quick Stats</h6>
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted small">Trainings Attended</span>
-                        <strong>{{ $employee->trainings->where('attendance_status', 'attended')->count() }}</strong>
+                        <a href="{{ route('employees.trainings', $employee) }}" class="text-decoration-none">
+                            <strong>{{ $employee->trainings->where('attendance_status', 'attended')->count() }}</strong>
+                        </a>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted small">201 Files</span>
-                        <strong>{{ $employee->files->count() }}</strong>
+                        <a href="{{ route('employee-files.index', $employee) }}" class="text-decoration-none">
+                            <strong>{{ $employee->files->count() }}</strong>
+                        </a>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span class="text-muted small">Years of Service</span>
-                        <strong>{{ $employee->date_hired ? now()->diffInYears($employee->date_hired) : 'N/A' }}</strong>
+                        <strong>{{ $employee->date_hired ? $employee->date_hired->diffInYears(\Carbon\Carbon::now()) : 'N/A' }}</strong>
                     </div>
                 </div>
             </div>

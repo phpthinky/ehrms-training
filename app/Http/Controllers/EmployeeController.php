@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\Department;
 use App\Models\User;
+use App\Mail\WelcomeEmployee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class EmployeeController extends Controller
 {
@@ -40,20 +43,23 @@ class EmployeeController extends Controller
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:hr_users,email',
-            'employee_number' => 'required|string|unique:hr_employees,employee_number',
-            'department_id' => 'required|exists:hr_departments,id',
+            'email' => 'required|email|unique:users,email',
+            'employee_number' => 'required|string|unique:employees,employee_number',
+            'department_id' => 'required|exists:departments,id',
             'position' => 'required|string|max:255',
             'employment_type' => 'required|in:permanent,job_order,contract',
             'rank_level' => 'required|in:higher,normal',
             'date_hired' => 'nullable|date',
         ]);
 
+        // Generate random password (8 characters: letters, numbers, and special chars)
+        $randomPassword = Str::password(12, true, true, false);
+
         // Create user account
         $user = User::create([
             'name' => $validated['first_name'] . ' ' . $validated['last_name'],
             'email' => strtolower($validated['email']),
-            'password' => Hash::make('password'), // Default password
+            'password' => Hash::make($randomPassword),
             'role' => 'employee',
             'status' => 'active',
             'employee_id' => $validated['employee_number'],
@@ -62,7 +68,7 @@ class EmployeeController extends Controller
         ]);
 
         // Create employee record
-        Employee::create([
+        $employee = Employee::create([
             'user_id' => $user->id,
             'department_id' => $validated['department_id'],
             'employee_number' => $validated['employee_number'],
@@ -77,8 +83,20 @@ class EmployeeController extends Controller
             'email' => $validated['email'],
         ]);
 
+        // Load department relationship for email
+        $employee->load('department');
+
+        // Send welcome email with credentials
+        try {
+            Mail::to($employee->email)->send(new WelcomeEmployee($employee, $randomPassword));
+            $emailStatus = 'Welcome email sent successfully.';
+        } catch (\Exception $e) {
+            $emailStatus = 'Employee created but email failed to send. Password: ' . $randomPassword;
+            \Log::error('Failed to send welcome email: ' . $e->getMessage());
+        }
+
         return redirect()->route('employees.index')
-            ->with('success', 'Employee created successfully. Default password is "password".');
+            ->with('success', 'Employee created successfully. ' . $emailStatus);
     }
 
     /**
@@ -108,7 +126,7 @@ class EmployeeController extends Controller
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
-            'department_id' => 'required|exists:hr_departments,id',
+            'department_id' => 'required|exists:departments,id',
             'position' => 'required|string|max:255',
             'employment_type' => 'required|in:permanent,job_order,contract',
             'rank_level' => 'required|in:higher,normal',
@@ -160,7 +178,7 @@ class EmployeeController extends Controller
     public function myTrainings()
     {
         $employee = auth()->user()->employee;
-        
+
         if (!$employee) {
             return redirect()->route('dashboard')
                 ->with('error', 'No employee record found.');
@@ -172,5 +190,30 @@ class EmployeeController extends Controller
             ->get();
 
         return view('employees.my-trainings', compact('employee', 'trainings'));
+    }
+
+    /**
+     * View employee's trainings attended (HR Admin view)
+     */
+    public function trainings(Employee $employee)
+    {
+        // Check authorization - HR staff can view all, employees can view only their own
+        $user = auth()->user();
+
+        if (!$user->isStaff()) {
+            // For employees, check if this is their own record
+            if (!$user->employee || $user->employee->id != $employee->id) {
+                abort(403, 'Unauthorized access');
+            }
+        }
+
+        $employee->load(['user', 'department']);
+
+        $trainings = $employee->trainings()
+            ->with(['training.topic'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('employees.trainings', compact('employee', 'trainings'));
     }
 }

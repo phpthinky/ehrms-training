@@ -33,8 +33,8 @@ class DepartmentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:hr_departments,name',
-            'code' => 'required|string|max:50|unique:hr_departments,code',
+            'name' => 'required|string|max:255|unique:departments,name',
+            'code' => 'required|string|max:50|unique:departments,code',
             'description' => 'nullable|string',
         ]);
 
@@ -67,8 +67,8 @@ class DepartmentController extends Controller
     public function update(Request $request, Department $department)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:hr_departments,name,' . $department->id,
-            'code' => 'required|string|max:50|unique:hr_departments,code,' . $department->id,
+            'name' => 'required|string|max:255|unique:departments,name,' . $department->id,
+            'code' => 'required|string|max:50|unique:departments,code,' . $department->id,
             'description' => 'nullable|string',
             'is_active' => 'required|boolean',
         ]);
