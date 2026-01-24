@@ -171,5 +171,10 @@ Route::middleware(['auth'])->group(function () {
     // Profile & Settings
     Route::get('profile', [ProfileController::class, 'show'])->name('profile');
     Route::get('settings', [SettingsController::class, 'show'])->name('settings');
-    
+
+    // Help & Guide (All authenticated users)
+    Route::get('help', function () {
+        return view('help.index');
+    })->name('help');
+
 });

@@ -537,6 +537,13 @@
                     @endif
                 </a>
 
+                <!-- Help & Support -->
+                <div class="nav-section-title">Support</div>
+                <a href="{{ route('help') }}" class="nav-link {{ request()->routeIs('help') ? 'active' : '' }}">
+                    <i class="bi bi-question-circle"></i>
+                    <span class="nav-link-text">Help & Guide</span>
+                </a>
+
                 @if(auth()->user()->isStaff())
                     <!-- Files & Reports -->
                     <div class="nav-section-title">Resources</div>
@@ -617,6 +624,7 @@
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ route('profile') }}"><i class="bi bi-person me-2"></i>My Profile</a></li>
                             <li><a class="dropdown-item" href="{{ route('settings') }}"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                            <li><a class="dropdown-item" href="{{ route('help') }}"><i class="bi bi-question-circle me-2"></i>Help & Guide</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form action="{{ route('logout') }}" method="POST">
