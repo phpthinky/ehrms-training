@@ -11,9 +11,11 @@
             <h4 class="mb-1" style="font-family: 'Outfit', sans-serif; font-weight: 600;">Employees</h4>
             <p class="text-muted mb-0">Manage employee records and information</p>
         </div>
-        <a href="{{ route('employees.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-2"></i>Add New Employee
-        </a>
+        @if(auth()->user()->isHRAdmin())
+            <a href="{{ route('employees.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Add New Employee
+            </a>
+        @endif
     </div>
 
     <!-- Search & Filter Card -->
