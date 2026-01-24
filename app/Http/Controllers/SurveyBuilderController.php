@@ -32,7 +32,7 @@ class SurveyBuilderController extends Controller
     public function addQuestion(Request $request, SurveyTemplate $surveyTemplate)
     {
         $validated = $request->validate([
-            'question_id' => 'required|exists:hr_survey_questions,id',
+            'question_id' => 'required|exists:survey_questions,id',
             'is_required' => 'boolean',
         ]);
 
@@ -84,7 +84,7 @@ class SurveyBuilderController extends Controller
     {
         $validated = $request->validate([
             'questions' => 'required|array',
-            'questions.*.id' => 'required|exists:hr_survey_questions,id',
+            'questions.*.id' => 'required|exists:survey_questions,id',
             'questions.*.order' => 'required|integer|min:0',
         ]);
 
