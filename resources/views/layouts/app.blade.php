@@ -514,7 +514,7 @@
                         <i class="bi bi-clipboard-check"></i>
                         <span class="nav-link-text">Training Survey</span>
                     </a>
-                    <a href="{{ route('survey-responses.form') }}" class="nav-link {{ request()->routeIs('survey-responses.*') ? 'active' : '' }}">
+                    <a href="{{ route('survey.form') }}" class="nav-link {{ request()->routeIs('survey.*') ? 'active' : '' }}">
                         <i class="bi bi-card-checklist"></i>
                         <span class="nav-link-text">Annual Survey</span>
                     </a>
