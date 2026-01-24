@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\Department;
 use App\Models\User;
+use App\Mail\WelcomeEmployee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class EmployeeController extends Controller
 {
@@ -49,11 +52,14 @@ class EmployeeController extends Controller
             'date_hired' => 'nullable|date',
         ]);
 
+        // Generate random password (8 characters: letters, numbers, and special chars)
+        $randomPassword = Str::password(12, true, true, false);
+
         // Create user account
         $user = User::create([
             'name' => $validated['first_name'] . ' ' . $validated['last_name'],
             'email' => strtolower($validated['email']),
-            'password' => Hash::make('password'), // Default password
+            'password' => Hash::make($randomPassword),
             'role' => 'employee',
             'status' => 'active',
             'employee_id' => $validated['employee_number'],
@@ -62,7 +68,7 @@ class EmployeeController extends Controller
         ]);
 
         // Create employee record
-        Employee::create([
+        $employee = Employee::create([
             'user_id' => $user->id,
             'department_id' => $validated['department_id'],
             'employee_number' => $validated['employee_number'],
@@ -77,8 +83,20 @@ class EmployeeController extends Controller
             'email' => $validated['email'],
         ]);
 
+        // Load department relationship for email
+        $employee->load('department');
+
+        // Send welcome email with credentials
+        try {
+            Mail::to($employee->email)->send(new WelcomeEmployee($employee, $randomPassword));
+            $emailStatus = 'Welcome email sent successfully.';
+        } catch (\Exception $e) {
+            $emailStatus = 'Employee created but email failed to send. Password: ' . $randomPassword;
+            \Log::error('Failed to send welcome email: ' . $e->getMessage());
+        }
+
         return redirect()->route('employees.index')
-            ->with('success', 'Employee created successfully. Default password is "password".');
+            ->with('success', 'Employee created successfully. ' . $emailStatus);
     }
 
     /**
