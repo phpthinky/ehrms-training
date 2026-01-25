@@ -20,6 +20,7 @@ use App\Http\Controllers\SurveyTemplateController;
 use App\Http\Controllers\SurveyQuestionController;
 use App\Http\Controllers\SurveyBuilderController;
 use App\Http\Controllers\SurveyResponseController;
+use App\Http\Controllers\SystemSettingsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -129,7 +130,27 @@ Route::middleware(['auth'])->group(function () {
         Route::get('reports/department', [ReportController::class, 'departmentReport'])->name('reports.department');
         Route::get('reports/export/training', [ReportController::class, 'exportTrainingCSV'])->name('reports.export.training');
         Route::get('reports/export/employee', [ReportController::class, 'exportEmployeeCSV'])->name('reports.export.employee');
-        
+    });
+
+    // HR Admin Only Routes (Settings)
+    Route::middleware(['role:hr_admin'])->group(function () {
+        // System Settings - 201 Files
+        Route::get('settings/201-files', [SystemSettingsController::class, 'fileSettings'])->name('settings.file-settings');
+        Route::post('settings/201-files', [SystemSettingsController::class, 'updateFileSettings'])->name('settings.file-settings.update');
+    });
+
+    // Employee File Upload (Conditional - based on system setting)
+    // These routes are available to employees when setting is enabled
+    // Permission check is done inside the controller
+    Route::middleware(['role:employee'])->group(function () {
+        Route::get('my-files/upload', [EmployeeFileController::class, 'create'])->name('my-files.create')
+            ->defaults('employeeId', function() {
+                return auth()->user()->employee?->id;
+            });
+        Route::post('my-files/upload', [EmployeeFileController::class, 'store'])->name('my-files.store')
+            ->defaults('employeeId', function() {
+                return auth()->user()->employee?->id;
+            });
     });
     
     // Employee Routes

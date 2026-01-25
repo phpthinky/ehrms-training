@@ -14,6 +14,22 @@ use Illuminate\Support\Str;
 class EmployeeController extends Controller
 {
     /**
+     * Generate a random password without confusing characters
+     * Excludes: 0, O, 1, l, I to avoid confusion
+     */
+    private function generateClearPassword($length = 12)
+    {
+        $characters = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
+        $password = '';
+        $maxIndex = strlen($characters) - 1;
+
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $characters[random_int(0, $maxIndex)];
+        }
+
+        return $password;
+    }
+    /**
      * Display a listing of the resource.
      */
     public function index()
@@ -52,8 +68,8 @@ class EmployeeController extends Controller
             'date_hired' => 'nullable|date',
         ]);
 
-        // Generate random password (8 characters: letters, numbers, and special chars)
-        $randomPassword = Str::password(12, true, true, false);
+        // Generate random password (12 characters: letters and numbers, no confusing chars)
+        $randomPassword = $this->generateClearPassword(12);
 
         // Normalize email to lowercase
         $normalizedEmail = strtolower($validated['email']);
@@ -190,8 +206,8 @@ class EmployeeController extends Controller
             return back()->with('error', 'This employee does not have a user account.');
         }
 
-        // Generate new random password
-        $randomPassword = Str::password(12, true, true, false);
+        // Generate new random password (12 characters: letters and numbers, no confusing chars)
+        $randomPassword = $this->generateClearPassword(12);
 
         // Normalize email to lowercase for consistency
         $normalizedEmail = strtolower($employee->email);
