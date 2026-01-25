@@ -48,14 +48,14 @@ class SimpleComprehensiveSeeder extends Seeder
         $topics = $this->createTrainingTopics();
 
         // 4. Create Trainings (40 trainings over 2 years)
-        echo "🎓 Creating 40 Trainings (2023-2024)...\n";
+        echo "🎓 Creating 40 Trainings (2024-2025)...\n";
         $trainings = $this->createTrainings($topics);
 
         // 5. Create Training Attendance (realistic attendance)
         echo "✅ Creating Training Attendance Records...\n";
         $this->createTrainingAttendance($trainings, $employees);
 
-        // 6. Create Training Surveys (2023 & 2024)
+        // 6. Create Training Surveys (2024 & 2025)
         echo "📋 Creating Training Surveys (2 years)...\n";
         $this->createTrainingSurveys($employees, $topics);
 
@@ -189,10 +189,10 @@ class SimpleComprehensiveSeeder extends Seeder
         );
 
         $adminEmployee = Employee::updateOrCreate(
-            ['employee_number' => 'EMP-2023-001'],
+            ['employee_number' => 'EMP-2024-001'],
             [
                 'user_id' => $adminUser->id,
-                'employee_number' => 'EMP-2023-001',
+                'employee_number' => 'EMP-2024-001',
                 'first_name' => 'Maria',
                 'middle_name' => 'Cruz',
                 'last_name' => 'Santos',
@@ -227,10 +227,10 @@ class SimpleComprehensiveSeeder extends Seeder
         );
 
         $assistantEmployee = Employee::updateOrCreate(
-            ['employee_number' => 'EMP-2023-002'],
+            ['employee_number' => 'EMP-2024-002'],
             [
                 'user_id' => $assistantUser->id,
-                'employee_number' => 'EMP-2023-002',
+                'employee_number' => 'EMP-2024-002',
                 'first_name' => 'Juan',
                 'middle_name' => 'Cruz',
                 'last_name' => 'Dela Cruz',
@@ -271,11 +271,11 @@ class SimpleComprehensiveSeeder extends Seeder
                       'Ramirez', 'Cruz', 'Flores', 'Ramos', 'Reyes', 'Santos', 'Morales'];
         $positions = ['Administrative Officer', 'Clerk', 'Engineer', 'Nurse', 'Driver', 'Accountant', 'Secretary'];
 
-        for ($i = 2; $i <= 50; $i++) {
+        for ($i = 4; $i <= 50; $i++) {
             $firstName = $firstNames[array_rand($firstNames)];
             $lastName = $lastNames[array_rand($lastNames)];
             $middleName = $lastNames[array_rand($lastNames)];
-            $empId = 'EMP-' . (rand(0, 1) ? '2023' : '2024') . '-' . str_pad($i, 3, '0', STR_PAD_LEFT);
+            $empId = 'EMP-' . (rand(0, 1) ? '2024' : '2025') . '-' . str_pad($i, 3, '0', STR_PAD_LEFT);
             $email = strtolower($firstName . '.' . $lastName . $i . '@sablayan.gov.ph');
             $fullName = $firstName . ' ' . $lastName;
             
@@ -371,13 +371,13 @@ class SimpleComprehensiveSeeder extends Seeder
     {
         $trainings = [];
         
-        // 20 trainings in 2023
+        // 20 trainings in 2024
         for ($i = 0; $i < 20; $i++) {
             $topic = $topics->random();
-            $startDate = Carbon::parse('2023-' . rand(1, 12) . '-' . rand(1, 28));
+            $startDate = Carbon::parse('2024-' . rand(1, 12) . '-' . rand(1, 28));
             
             $training = Training::create([
-                'title' => $topic->title . ' Training 2023',
+                'title' => $topic->title . ' Training 2024',
                 'description' => 'Comprehensive training on ' . strtolower($topic->title),
                 'training_topic_id' => $topic->id,
                 'created_by' => 1,
@@ -397,10 +397,10 @@ class SimpleComprehensiveSeeder extends Seeder
             $trainings[] = $training;
         }
 
-        // 20 trainings in 2024
+        // 20 trainings in 2025
         for ($i = 0; $i < 20; $i++) {
             $topic = $topics->random();
-            $startDate = Carbon::parse('2024-' . rand(1, 12) . '-' . rand(1, 28));
+            $startDate = Carbon::parse('2025-' . rand(1, 12) . '-' . rand(1, 28));
             $now = Carbon::now();
             
             if ($startDate < $now->copy()->subDays(7)) {
@@ -412,7 +412,7 @@ class SimpleComprehensiveSeeder extends Seeder
             }
 
             $training = Training::create([
-                'title' => $topic->title . ' Training 2024',
+                'title' => $topic->title . ' Training 2025',
                 'description' => 'Comprehensive training on ' . strtolower($topic->title),
                 'training_topic_id' => $topic->id,
                 'created_by' => 1,
@@ -472,15 +472,15 @@ class SimpleComprehensiveSeeder extends Seeder
             null,
         ];
 
-        // 2023 surveys
-        $respondents2023 = $employees->random((int)($employees->count() * 0.70));
-        foreach ($respondents2023 as $employee) {
+        // 2024 surveys
+        $respondents2024 = $employees->random((int)($employees->count() * 0.70));
+        foreach ($respondents2024 as $employee) {
             $selectedTopics = $topics->random(rand(3, 7))->pluck('id')->toArray();
-            $submittedDate = Carbon::parse('2023-' . rand(1, 3) . '-' . rand(1, 28));
+            $submittedDate = Carbon::parse('2024-' . rand(1, 3) . '-' . rand(1, 28));
 
             TrainingSurvey::create([
                 'employee_id' => $employee->id,
-                'year' => 2023,
+                'year' => 2024,
                 'selected_topics' => json_encode($selectedTopics),
                 'other_topics' => $otherTopicsSuggestions[array_rand($otherTopicsSuggestions)],
                 'status' => 'submitted',
@@ -489,15 +489,15 @@ class SimpleComprehensiveSeeder extends Seeder
             ]);
         }
 
-        // 2024 surveys
-        $respondents2024 = $employees->random((int)($employees->count() * 0.75));
-        foreach ($respondents2024 as $employee) {
+        // 2025 surveys
+        $respondents2025 = $employees->random((int)($employees->count() * 0.75));
+        foreach ($respondents2025 as $employee) {
             $selectedTopics = $topics->random(rand(3, 7))->pluck('id')->toArray();
-            $submittedDate = Carbon::parse('2024-' . rand(1, 12) . '-' . rand(1, 28));
+            $submittedDate = Carbon::parse('2025-' . rand(1, 12) . '-' . rand(1, 28));
 
             TrainingSurvey::create([
                 'employee_id' => $employee->id,
-                'year' => 2024,
+                'year' => 2025,
                 'selected_topics' => json_encode($selectedTopics),
                 'other_topics' => $otherTopicsSuggestions[array_rand($otherTopicsSuggestions)],
                 'status' => 'submitted',
@@ -529,7 +529,7 @@ class SimpleComprehensiveSeeder extends Seeder
     private function createHRDocuments()
     {
         $documents = [
-            ['Leave Policy 2023', 'Annual leave guidelines'],
+            ['Leave Policy 2024', 'Annual leave guidelines'],
             ['Employee Handbook', 'Complete guide for employees'],
             ['Performance Evaluation Form', 'Assessment template'],
         ];

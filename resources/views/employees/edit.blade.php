@@ -117,6 +117,20 @@
                             </div>
                         </div>
 
+                        <!-- Contact Information -->
+                        <h6 class="mb-3 text-primary" style="font-weight: 600;">Contact Information</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
+                                       value="{{ old('email', $employee->email ?? $employee->user->email ?? '') }}" required>
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted">Email will be used for login and notifications</small>
+                            </div>
+                        </div>
+
                         <!-- Form Actions -->
                         <div class="d-flex gap-2 justify-content-end pt-3 border-top">
                             <a href="{{ route('employees.show', $employee) }}" class="btn btn-light px-4">
@@ -145,17 +159,13 @@
                     </div>
 
                     <div class="mb-3">
-                        <small class="text-muted d-block mb-1">Email</small>
-                        <strong>{{ $employee->email ?? $employee->user->email ?? 'N/A' }}</strong>
-                    </div>
-
-                    <div class="mb-3">
                         <small class="text-muted d-block mb-1">Date Hired</small>
                         <strong>{{ $employee->date_hired ? \Carbon\Carbon::parse($employee->date_hired)->format('M d, Y') : 'N/A' }}</strong>
                     </div>
 
-                    <div class="alert alert-warning alert-sm mb-0">
-                        <small><i class="bi bi-exclamation-triangle me-2"></i><strong>Note:</strong> Employee number and email cannot be changed here.</small>
+                    <div class="alert alert-info alert-sm mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <small><strong>Note:</strong> Email can be edited in the form on the left. Employee number cannot be changed after creation.</small>
                     </div>
                 </div>
             </div>

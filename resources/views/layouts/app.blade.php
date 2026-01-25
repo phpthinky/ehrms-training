@@ -469,10 +469,6 @@
                         <i class="bi bi-journal-bookmark"></i>
                         <span class="nav-link-text">Trainings</span>
                     </a>
-                    <a href="{{ route('training-topics.index') }}" class="nav-link {{ request()->routeIs('training-topics.*') ? 'active' : '' }}">
-                        <i class="bi bi-tags"></i>
-                        <span class="nav-link-text">Training Topics</span>
-                    </a>
                     <a href="{{ route('surveys.index') }}" class="nav-link {{ request()->routeIs('surveys.*') ? 'active' : '' }}">
                         <i class="bi bi-clipboard-data"></i>
                         <span class="nav-link-text">Survey Results</span>
@@ -514,7 +510,7 @@
                         <i class="bi bi-clipboard-check"></i>
                         <span class="nav-link-text">Training Survey</span>
                     </a>
-                    <a href="{{ route('survey-responses.form') }}" class="nav-link {{ request()->routeIs('survey-responses.*') ? 'active' : '' }}">
+                    <a href="{{ route('survey.form') }}" class="nav-link {{ request()->routeIs('survey.*') ? 'active' : '' }}">
                         <i class="bi bi-card-checklist"></i>
                         <span class="nav-link-text">Annual Survey</span>
                     </a>
@@ -537,6 +533,13 @@
                     @endif
                 </a>
 
+                <!-- Help & Support -->
+                <div class="nav-section-title">Support</div>
+                <a href="{{ route('help') }}" class="nav-link {{ request()->routeIs('help') ? 'active' : '' }}">
+                    <i class="bi bi-question-circle"></i>
+                    <span class="nav-link-text">Help & Guide</span>
+                </a>
+
                 @if(auth()->user()->isStaff())
                     <!-- Files & Reports -->
                     <div class="nav-section-title">Resources</div>
@@ -548,6 +551,15 @@
                         <i class="bi bi-file-bar-graph"></i>
                         <span class="nav-link-text">Reports</span>
                     </a>
+
+                    @if(auth()->user()->isHRAdmin())
+                        <!-- System Settings -->
+                        <div class="nav-section-title">System</div>
+                        <a href="{{ route('settings.file-settings') }}" class="nav-link {{ request()->routeIs('settings.file-settings') ? 'active' : '' }}">
+                            <i class="bi bi-gear"></i>
+                            <span class="nav-link-text">201 Files Settings</span>
+                        </a>
+                    @endif
                 @endif
             @endauth
         </nav>
@@ -617,6 +629,7 @@
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ route('profile') }}"><i class="bi bi-person me-2"></i>My Profile</a></li>
                             <li><a class="dropdown-item" href="{{ route('settings') }}"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                            <li><a class="dropdown-item" href="{{ route('help') }}"><i class="bi bi-question-circle me-2"></i>Help & Guide</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form action="{{ route('logout') }}" method="POST">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\EmployeeFile;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 
 class EmployeeFileController extends Controller
@@ -39,10 +40,22 @@ class EmployeeFileController extends Controller
     public function create($employeeId)
     {
         $employee = Employee::findOrFail($employeeId);
-        
-        // Only HR staff can upload
-        if (!auth()->user()->isStaff()) {
-            abort(403, 'Only HR staff can upload files');
+        $user = auth()->user();
+
+        // Check permissions
+        $allowEmployeeUpload = SystemSetting::allowEmployeeFileUpload();
+
+        if (!$user->isStaff()) {
+            // For employees, check if:
+            // 1. They own this record
+            // 2. Employee upload is enabled
+            if (!$user->employee || $user->employee->id != $employee->id) {
+                abort(403, 'Unauthorized access');
+            }
+
+            if (!$allowEmployeeUpload) {
+                abort(403, 'Employee file upload is currently disabled. Please contact HR to upload documents.');
+            }
         }
 
         return view('employee-files.create', compact('employee'));
@@ -54,7 +67,22 @@ class EmployeeFileController extends Controller
     public function store(Request $request, $employeeId)
     {
         $employee = Employee::findOrFail($employeeId);
-        
+        $user = auth()->user();
+
+        // Check permissions
+        $allowEmployeeUpload = SystemSetting::allowEmployeeFileUpload();
+
+        if (!$user->isStaff()) {
+            // For employees, verify ownership and setting
+            if (!$user->employee || $user->employee->id != $employee->id) {
+                abort(403, 'Unauthorized access');
+            }
+
+            if (!$allowEmployeeUpload) {
+                return back()->with('error', 'Employee file upload is currently disabled. Please contact HR.');
+            }
+        }
+
         $validated = $request->validate([
             'file' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240', // 10MB
             'file_type' => 'required|in:pds,tor,certificate,diploma,nbi_clearance,medical_certificate,tax_identification,birth_certificate,marriage_certificate,service_record,other',

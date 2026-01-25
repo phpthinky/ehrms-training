@@ -14,6 +14,22 @@ use Illuminate\Support\Str;
 class EmployeeController extends Controller
 {
     /**
+     * Generate a random password without confusing characters
+     * Excludes: 0, O, 1, l, I to avoid confusion
+     */
+    private function generateClearPassword($length = 12)
+    {
+        $characters = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
+        $password = '';
+        $maxIndex = strlen($characters) - 1;
+
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $characters[random_int(0, $maxIndex)];
+        }
+
+        return $password;
+    }
+    /**
      * Display a listing of the resource.
      */
     public function index()
@@ -52,13 +68,16 @@ class EmployeeController extends Controller
             'date_hired' => 'nullable|date',
         ]);
 
-        // Generate random password (8 characters: letters, numbers, and special chars)
-        $randomPassword = Str::password(12, true, true, false);
+        // Generate random password (12 characters: letters and numbers, no confusing chars)
+        $randomPassword = $this->generateClearPassword(12);
+
+        // Normalize email to lowercase
+        $normalizedEmail = strtolower($validated['email']);
 
         // Create user account
         $user = User::create([
             'name' => $validated['first_name'] . ' ' . $validated['last_name'],
-            'email' => strtolower($validated['email']),
+            'email' => $normalizedEmail,
             'password' => Hash::make($randomPassword),
             'role' => 'employee',
             'status' => 'active',
@@ -80,7 +99,7 @@ class EmployeeController extends Controller
             'employment_type' => $validated['employment_type'],
             'date_hired' => $validated['date_hired'],
             'status' => 'active',
-            'email' => $validated['email'],
+            'email' => $normalizedEmail,
         ]);
 
         // Load department relationship for email
@@ -126,6 +145,7 @@ class EmployeeController extends Controller
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $employee->user_id,
             'department_id' => 'required|exists:departments,id',
             'position' => 'required|string|max:255',
             'employment_type' => 'required|in:permanent,job_order,contract',
@@ -133,11 +153,26 @@ class EmployeeController extends Controller
             'status' => 'required|in:active,inactive,resigned',
         ]);
 
-        $employee->update($validated);
+        // Normalize email to lowercase
+        $normalizedEmail = strtolower($validated['email']);
+
+        // Update employee record
+        $employee->update([
+            'first_name' => $validated['first_name'],
+            'middle_name' => $validated['middle_name'],
+            'last_name' => $validated['last_name'],
+            'email' => $normalizedEmail,
+            'department_id' => $validated['department_id'],
+            'position' => $validated['position'],
+            'employment_type' => $validated['employment_type'],
+            'rank_level' => $validated['rank_level'],
+            'status' => $validated['status'],
+        ]);
 
         // Update user record
         $employee->user->update([
             'name' => $validated['first_name'] . ' ' . $validated['last_name'],
+            'email' => $normalizedEmail,
             'position' => $validated['position'],
             'employment_type' => $validated['employment_type'],
         ]);
@@ -154,6 +189,49 @@ class EmployeeController extends Controller
         $employee->delete();
         return redirect()->route('employees.index')
             ->with('success', 'Employee deleted successfully.');
+    }
+
+    /**
+     * Resend password to employee email
+     */
+    public function resendPassword(Employee $employee)
+    {
+        // Check if user is HR Admin
+        if (!auth()->user()->isHRAdmin()) {
+            return back()->with('error', 'Unauthorized action.');
+        }
+
+        // Check if employee has a user account
+        if (!$employee->user_id) {
+            return back()->with('error', 'This employee does not have a user account.');
+        }
+
+        // Generate new random password (12 characters: letters and numbers, no confusing chars)
+        $randomPassword = $this->generateClearPassword(12);
+
+        // Normalize email to lowercase for consistency
+        $normalizedEmail = strtolower($employee->email);
+
+        // Update user password and ensure email matches
+        $user = User::find($employee->user_id);
+        $user->password = Hash::make($randomPassword);
+        $user->email = $normalizedEmail;
+        $user->save();
+
+        // Update employee email to match (ensure consistency)
+        $employee->email = $normalizedEmail;
+        $employee->save();
+
+        // Send welcome email with new credentials
+        try {
+            Mail::to($normalizedEmail)->send(new WelcomeEmployee($employee, $randomPassword));
+            $emailStatus = 'Password reset and email sent successfully to ' . $normalizedEmail;
+        } catch (\Exception $e) {
+            $emailStatus = 'Password updated but email failed to send. New password: ' . $randomPassword;
+            \Log::error('Failed to resend password email: ' . $e->getMessage());
+        }
+
+        return back()->with('success', $emailStatus);
     }
 
     /**

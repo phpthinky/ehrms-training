@@ -70,11 +70,16 @@
             border: 1px solid #e2e8f0;
             font-size: 14px;
             color: #1e293b;
+            word-break: break-all;
+            user-select: all;
         }
         .password-value {
             font-weight: bold;
             color: #dc2626;
             font-size: 16px;
+            letter-spacing: 1px;
+            word-break: keep-all;
+            white-space: nowrap;
         }
         .info-box {
             background-color: #fef3c7;
@@ -191,8 +196,12 @@
                 </div>
                 <div class="credential-item">
                     <span class="credential-label">Password:</span>
-                    <span class="credential-value password-value">{{ $password }}</span>
+                    <span class="credential-value password-value">{{ trim($password) }}</span>
                 </div>
+                <p style="margin: 15px 0 5px 0; font-size: 13px; color: #64748b;">
+                    <strong>Copy Tip:</strong> Select the password above by triple-clicking on it, then copy (Ctrl+C or Cmd+C).
+                    Make sure not to include any extra spaces when pasting.
+                </p>
             </div>
 
             <!-- Important Security Notice -->
