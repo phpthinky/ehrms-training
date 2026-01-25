@@ -551,6 +551,15 @@
                         <i class="bi bi-file-bar-graph"></i>
                         <span class="nav-link-text">Reports</span>
                     </a>
+
+                    @if(auth()->user()->isHRAdmin())
+                        <!-- System Settings -->
+                        <div class="nav-section-title">System</div>
+                        <a href="{{ route('settings.file-settings') }}" class="nav-link {{ request()->routeIs('settings.file-settings') ? 'active' : '' }}">
+                            <i class="bi bi-gear"></i>
+                            <span class="nav-link-text">201 Files Settings</span>
+                        </a>
+                    @endif
                 @endif
             @endauth
         </nav>

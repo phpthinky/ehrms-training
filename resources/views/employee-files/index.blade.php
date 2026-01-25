@@ -35,7 +35,13 @@
                         </div>
                     </div>
                 </div>
-                @if(auth()->user()->isStaff())
+                @php
+                    $allowEmployeeUpload = \App\Models\SystemSetting::allowEmployeeFileUpload();
+                    $canUpload = auth()->user()->isStaff() ||
+                                 ($allowEmployeeUpload && auth()->user()->employee && auth()->user()->employee->id == $employee->id);
+                @endphp
+
+                @if($canUpload)
                     <a href="{{ route('employee-files.create', $employee) }}" class="btn btn-primary">
                         <i class="bi bi-cloud-upload me-2"></i>Upload File
                     </a>
