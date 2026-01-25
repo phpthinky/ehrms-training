@@ -83,4 +83,44 @@ class SystemSetting extends Model
     {
         return (bool) self::get('allow_employee_file_upload', false);
     }
+
+    /**
+     * Get application name
+     */
+    public static function appName(): string
+    {
+        return self::get('app_name', 'EHRMS');
+    }
+
+    /**
+     * Get application short name
+     */
+    public static function appShortName(): string
+    {
+        return self::get('app_short_name', 'EHRMS');
+    }
+
+    /**
+     * Get application logo path
+     */
+    public static function appLogo(): ?string
+    {
+        return self::get('app_logo', null);
+    }
+
+    /**
+     * Get application tagline
+     */
+    public static function appTagline(): string
+    {
+        return self::get('app_tagline', 'Employee Human Resource Management System');
+    }
+
+    /**
+     * Get organization name
+     */
+    public static function organizationName(): string
+    {
+        return self::get('organization_name', 'LGU Sablayan');
+    }
 }
