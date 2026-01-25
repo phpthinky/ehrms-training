@@ -484,6 +484,10 @@
                         <i class="bi bi-journal-bookmark"></i>
                         <span class="nav-link-text">Trainings</span>
                     </a>
+                    <a href="{{ route('training-topics.index') }}" class="nav-link {{ request()->routeIs('training-topics.*') ? 'active' : '' }}">
+                        <i class="bi bi-bookmarks"></i>
+                        <span class="nav-link-text">Training Topics</span>
+                    </a>
                     <a href="{{ route('surveys.index') }}" class="nav-link {{ request()->routeIs('surveys.*') ? 'active' : '' }}">
                         <i class="bi bi-clipboard-data"></i>
                         <span class="nav-link-text">Survey Results</span>
