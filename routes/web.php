@@ -20,6 +20,7 @@ use App\Http\Controllers\SurveyTemplateController;
 use App\Http\Controllers\SurveyQuestionController;
 use App\Http\Controllers\SurveyBuilderController;
 use App\Http\Controllers\SurveyResponseController;
+use App\Http\Controllers\TrainingTopicController;
 
 /*
 |--------------------------------------------------------------------------
@@ -84,11 +85,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('trainings/{training}/attendance/eligible', [TrainingAttendanceController::class, 'getEligibleEmployees'])->name('trainings.attendance.eligible');
         Route::get('trainings/{training}/attendance/export', [TrainingAttendanceController::class, 'exportAttendance'])->name('trainings.attendance.export');
         
-        // Training Topics
-        Route::get('training-topics', function() {
-            return redirect()->route('dashboard')->with('info', 'Feature coming soon');
-        })->name('training-topics.index');
-        
+        // Training Topics Management
+        Route::resource('training-topics', TrainingTopicController::class);
+        Route::post('training-topics/{trainingTopic}/toggle-active', [TrainingTopicController::class, 'toggleActive'])->name('training-topics.toggle-active');
+
         // Training Programs CRUD
         Route::resource('training-programs', TrainingProgramController::class);
         Route::post('training-programs/reorder', [TrainingProgramController::class, 'reorder'])->name('training-programs.reorder');
