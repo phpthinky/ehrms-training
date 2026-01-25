@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Login - EHRMS LGU Sablayan</title>
+    <title>Login - {{ \App\Models\SystemSetting::appName() }}</title>
     
     <!-- Bootstrap 5.3 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -137,8 +137,8 @@
         }
 
         .brand-logo {
-            width: 80px;
-            height: 80px;
+            max-width: 200px;
+            max-height: 80px;
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
             border-radius: 20px;
@@ -148,6 +148,19 @@
             font-size: 2.5rem;
             margin-bottom: 2rem;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+        }
+
+        .brand-logo img {
+            max-width: 100%;
+            max-height: 60px;
+            object-fit: contain;
+        }
+
+        .brand-logo.no-custom-logo {
+            width: 80px;
+            height: 80px;
+            padding: 0;
         }
 
         .brand-title {
@@ -394,13 +407,24 @@
             <!-- Left Side - Branding -->
             <div class="login-branding">
                 <div class="brand-content">
-                    <div class="brand-logo">
-                        <i class="bi bi-building"></i>
+                    @php
+                        $appLogo = \App\Models\SystemSetting::appLogo();
+                        $appName = \App\Models\SystemSetting::appName();
+                        $appTagline = \App\Models\SystemSetting::appTagline();
+                        $orgName = \App\Models\SystemSetting::organizationName();
+                    @endphp
+
+                    <div class="brand-logo {{ $appLogo ? '' : 'no-custom-logo' }}">
+                        @if($appLogo)
+                            <img src="{{ asset($appLogo) }}" alt="{{ $appName }} Logo">
+                        @else
+                            <i class="bi bi-building"></i>
+                        @endif
                     </div>
-                    <h1 class="brand-title">Electronic Human Resource Management System</h1>
-                    <p class="brand-subtitle">Local Government Unit of Sablayan</p>
+                    <h1 class="brand-title">{{ $appName }}</h1>
+                    <p class="brand-subtitle">{{ $orgName }}</p>
                     <p class="brand-description">
-                        Streamlined employee records management, training coordination, and secure document handling for LGU personnel. Access your account to manage profiles, track trainings, and stay connected.
+                        {{ $appTagline ?: 'Streamlined employee records management, training coordination, and secure document handling for LGU personnel. Access your account to manage profiles, track trainings, and stay connected.' }}
                     </p>
                 </div>
             </div>

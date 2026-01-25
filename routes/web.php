@@ -134,6 +134,10 @@ Route::middleware(['auth'])->group(function () {
 
     // HR Admin Only Routes (Settings)
     Route::middleware(['role:hr_admin'])->group(function () {
+        // System Settings - General
+        Route::get('settings/general', [SystemSettingsController::class, 'generalSettings'])->name('settings.general-settings');
+        Route::post('settings/general', [SystemSettingsController::class, 'updateGeneralSettings'])->name('settings.general-settings.update');
+
         // System Settings - 201 Files
         Route::get('settings/201-files', [SystemSettingsController::class, 'fileSettings'])->name('settings.file-settings');
         Route::post('settings/201-files', [SystemSettingsController::class, 'updateFileSettings'])->name('settings.file-settings.update');

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'EHRMS - LGU Sablayan')</title>
+    <title>@yield('title', \App\Models\SystemSetting::appName())</title>
     
     <!-- Bootstrap 5.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -100,6 +100,12 @@
             flex-shrink: 0;
             font-weight: 700;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-logo-icon img {
+            max-width: 40px;
+            max-height: 40px;
+            object-fit: contain;
         }
 
         .sidebar-logo-text {
@@ -433,12 +439,21 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
+            @php
+                $appLogo = \App\Models\SystemSetting::appLogo();
+                $appShortName = \App\Models\SystemSetting::appShortName();
+                $orgName = \App\Models\SystemSetting::organizationName();
+            @endphp
             <div class="sidebar-logo-icon">
-                <i class="bi bi-building"></i>
+                @if($appLogo)
+                    <img src="{{ asset($appLogo) }}" alt="{{ $appShortName }} Logo">
+                @else
+                    <i class="bi bi-building"></i>
+                @endif
             </div>
             <div class="sidebar-logo-text">
-                <h5 class="mb-0">eHRMS</h5>
-                <small>LGU Sablayan</small>
+                <h5 class="mb-0">{{ $appShortName }}</h5>
+                <small>{{ $orgName }}</small>
             </div>
         </div>
 
@@ -555,8 +570,12 @@
                     @if(auth()->user()->isHRAdmin())
                         <!-- System Settings -->
                         <div class="nav-section-title">System</div>
+                        <a href="{{ route('settings.general-settings') }}" class="nav-link {{ request()->routeIs('settings.general-settings') ? 'active' : '' }}">
+                            <i class="bi bi-gear-wide-connected"></i>
+                            <span class="nav-link-text">General Settings</span>
+                        </a>
                         <a href="{{ route('settings.file-settings') }}" class="nav-link {{ request()->routeIs('settings.file-settings') ? 'active' : '' }}">
-                            <i class="bi bi-gear"></i>
+                            <i class="bi bi-file-earmark-text"></i>
                             <span class="nav-link-text">201 Files Settings</span>
                         </a>
                     @endif
