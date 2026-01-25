@@ -20,6 +20,7 @@ use App\Http\Controllers\SurveyTemplateController;
 use App\Http\Controllers\SurveyQuestionController;
 use App\Http\Controllers\SurveyBuilderController;
 use App\Http\Controllers\SurveyResponseController;
+use App\Http\Controllers\TrainingTopicController;
 use App\Http\Controllers\SystemSettingsController;
 
 /*
@@ -85,6 +86,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('trainings/{training}/attendance/notify', [TrainingAttendanceController::class, 'sendNotifications'])->name('trainings.attendance.notify');
         Route::get('trainings/{training}/attendance/eligible', [TrainingAttendanceController::class, 'getEligibleEmployees'])->name('trainings.attendance.eligible');
         Route::get('trainings/{training}/attendance/export', [TrainingAttendanceController::class, 'exportAttendance'])->name('trainings.attendance.export');
+        
+        // Training Topics Management
+        Route::resource('training-topics', TrainingTopicController::class);
+        Route::post('training-topics/{trainingTopic}/toggle-active', [TrainingTopicController::class, 'toggleActive'])->name('training-topics.toggle-active');
 
         // Training Programs CRUD
         Route::resource('training-programs', TrainingProgramController::class);
