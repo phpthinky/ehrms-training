@@ -55,7 +55,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-0 bg-gradient" style="background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);">
-                <div class="card-body p-4 text-white">
+                <div class="card-body p-4 text-dark">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
                             <h3 class="mb-2" style="font-family: 'Outfit', sans-serif; font-weight: 700;">
