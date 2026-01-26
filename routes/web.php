@@ -22,6 +22,7 @@ use App\Http\Controllers\SurveyBuilderController;
 use App\Http\Controllers\SurveyResponseController;
 use App\Http\Controllers\TrainingTopicController;
 use App\Http\Controllers\SystemSettingsController;
+use App\Http\Controllers\ExternalTrainingRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,6 +55,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Employee Trainings - View trainings attended (accessible to HR and Employees)
     Route::get('employees/{employee}/trainings', [EmployeeController::class, 'trainings'])->name('employees.trainings');
+
+    // External Training Requests - View & Download (accessible to HR and owner)
+    Route::get('external-training-requests/{externalTrainingRequest}', [ExternalTrainingRequestController::class, 'show'])->name('external-training-requests.show');
+    Route::get('external-training-requests/{externalTrainingRequest}/download/{type}', [ExternalTrainingRequestController::class, 'downloadDocument'])->name('external-training-requests.download');
 
     // HR Admin & Admin Assistant Routes
     Route::middleware(['role:hr_admin,admin_assistant'])->group(function () {
@@ -135,6 +140,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('reports/department', [ReportController::class, 'departmentReport'])->name('reports.department');
         Route::get('reports/export/training', [ReportController::class, 'exportTrainingCSV'])->name('reports.export.training');
         Route::get('reports/export/employee', [ReportController::class, 'exportEmployeeCSV'])->name('reports.export.employee');
+
+        // External Training Requests Management (HR)
+        Route::get('external-training-requests', [ExternalTrainingRequestController::class, 'index'])->name('external-training-requests.index');
+        Route::get('external-training-requests/{externalTrainingRequest}/review', [ExternalTrainingRequestController::class, 'review'])->name('external-training-requests.review');
+        Route::post('external-training-requests/{externalTrainingRequest}/process-review', [ExternalTrainingRequestController::class, 'processReview'])->name('external-training-requests.process-review');
+        Route::patch('external-training-requests/{externalTrainingRequest}/mark-completed', [ExternalTrainingRequestController::class, 'markCompleted'])->name('external-training-requests.mark-completed');
     });
 
     // HR Admin Only Routes (Settings)
@@ -176,6 +187,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/survey', [SurveyResponseController::class, 'showForm'])->name('survey.form');
         Route::post('/survey/submit', [SurveyResponseController::class, 'submit'])->name('survey.submit');
         Route::post('/survey/draft', [SurveyResponseController::class, 'saveDraft'])->name('survey.draft');
+
+        // External Training Requests (Employee)
+        Route::get('/my-external-training-requests', [ExternalTrainingRequestController::class, 'myRequests'])->name('my-external-training-requests');
+        Route::get('/external-training-requests/create', [ExternalTrainingRequestController::class, 'create'])->name('external-training-requests.create');
+        Route::post('/external-training-requests', [ExternalTrainingRequestController::class, 'store'])->name('external-training-requests.store');
+        Route::get('/external-training-requests/{externalTrainingRequest}/edit', [ExternalTrainingRequestController::class, 'edit'])->name('external-training-requests.edit');
+        Route::put('/external-training-requests/{externalTrainingRequest}', [ExternalTrainingRequestController::class, 'update'])->name('external-training-requests.update');
+        Route::delete('/external-training-requests/{externalTrainingRequest}', [ExternalTrainingRequestController::class, 'destroy'])->name('external-training-requests.destroy');
     });
     
     // Training Surveys (Both HR and Employees can view)

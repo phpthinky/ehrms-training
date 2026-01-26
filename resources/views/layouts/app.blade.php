@@ -496,6 +496,16 @@
                         <i class="bi bi-lightbulb"></i>
                         <span class="nav-link-text">TNA Recommendations</span>
                     </a>
+                    <a href="{{ route('external-training-requests.index') }}" class="nav-link {{ request()->routeIs('external-training-requests.*') ? 'active' : '' }}">
+                        <i class="bi bi-mortarboard"></i>
+                        <span class="nav-link-text">External Requests</span>
+                        @php
+                            $pendingExternalRequests = \App\Models\ExternalTrainingRequest::pending()->count();
+                        @endphp
+                        @if($pendingExternalRequests > 0)
+                            <span class="badge bg-warning rounded-pill">{{ $pendingExternalRequests }}</span>
+                        @endif
+                    </a>
 
                     <!-- Survey System -->
                     <div class="nav-section-title">Survey Management</div>
@@ -521,6 +531,10 @@
                     <a href="{{ route('my-files') }}" class="nav-link {{ request()->routeIs('my-files') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-text"></i>
                         <span class="nav-link-text">My 201 Files</span>
+                    </a>
+                    <a href="{{ route('my-external-training-requests') }}" class="nav-link {{ request()->routeIs('my-external-training-requests') || request()->routeIs('external-training-requests.create') || request()->routeIs('external-training-requests.edit') ? 'active' : '' }}">
+                        <i class="bi bi-mortarboard"></i>
+                        <span class="nav-link-text">External Training</span>
                     </a>
 
                     <!-- Survey -->
