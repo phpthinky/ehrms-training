@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\DB;
 class SurveyResponseController extends Controller
 {
     /**
-     * Show active survey form for employees
+     * Show active surveys list for employees
      */
-    public function showForm()
+    public function showForm(Request $request)
     {
         $employee = auth()->user()->employee;
 
@@ -24,31 +24,61 @@ class SurveyResponseController extends Controller
                 ->with('error', 'No employee record found.');
         }
 
-        // Get active survey template
-        $template = SurveyTemplate::where('is_active', true)->first();
+        // Get all active survey templates
+        $activeTemplates = SurveyTemplate::where('is_active', true)
+            ->orderBy('year', 'desc')
+            ->get();
 
-        if (!$template) {
+        if ($activeTemplates->isEmpty()) {
             return view('survey-responses.no-active-survey');
         }
 
-        // Check if already submitted
-        $existingResponse = SurveyResponse::where('survey_template_id', $template->id)
-            ->where('employee_id', $employee->id)
-            ->first();
+        // Check if a specific template is requested
+        $templateId = $request->get('template');
 
-        if ($existingResponse && $existingResponse->status === 'submitted') {
-            return view('survey-responses.already-submitted', compact('template', 'existingResponse'));
+        if ($templateId) {
+            $template = $activeTemplates->firstWhere('id', $templateId);
+
+            if (!$template) {
+                return redirect()->route('survey.form')
+                    ->with('error', 'Survey not found or not active.');
+            }
+
+            // Check if already submitted
+            $existingResponse = SurveyResponse::where('survey_template_id', $template->id)
+                ->where('employee_id', $employee->id)
+                ->first();
+
+            if ($existingResponse && $existingResponse->status === 'submitted') {
+                return view('survey-responses.already-submitted', compact('template', 'existingResponse', 'activeTemplates'));
+            }
+
+            // Load questions with order
+            $template->load(['questions' => function ($query) {
+                $query->orderByPivot('order');
+            }]);
+
+            // Get training programs for training_programs question type
+            $trainingPrograms = TrainingProgram::where('is_active', true)->orderBy('order')->get();
+
+            return view('survey-responses.form', compact('template', 'employee', 'existingResponse', 'trainingPrograms', 'activeTemplates'));
         }
 
-        // Load questions with order
-        $template->load(['questions' => function ($query) {
-            $query->orderByPivot('order');
-        }]);
+        // Show list of all active surveys with submission status
+        $surveysWithStatus = $activeTemplates->map(function ($template) use ($employee) {
+            $response = SurveyResponse::where('survey_template_id', $template->id)
+                ->where('employee_id', $employee->id)
+                ->first();
 
-        // Get training programs for training_programs question type
-        $trainingPrograms = TrainingProgram::where('is_active', true)->orderBy('order')->get();
+            return [
+                'template' => $template,
+                'response' => $response,
+                'status' => $response ? $response->status : 'not_started',
+                'submitted_at' => $response && $response->status === 'submitted' ? $response->submitted_at : null,
+            ];
+        });
 
-        return view('survey-responses.form', compact('template', 'employee', 'existingResponse', 'trainingPrograms'));
+        return view('survey-responses.survey-list', compact('surveysWithStatus', 'employee'));
     }
 
     /**
@@ -62,10 +92,14 @@ class SurveyResponseController extends Controller
             return back()->with('error', 'No employee record found.');
         }
 
-        $template = SurveyTemplate::where('is_active', true)->first();
+        // Get template ID from request
+        $request->validate(['template_id' => 'required|exists:survey_templates,id']);
+        $template = SurveyTemplate::where('id', $request->template_id)
+            ->where('is_active', true)
+            ->first();
 
         if (!$template) {
-            return back()->with('error', 'No active survey available.');
+            return back()->with('error', 'Survey not found or not active.');
         }
 
         // Check if already submitted
@@ -78,8 +112,13 @@ class SurveyResponseController extends Controller
             return back()->with('error', 'You have already submitted this survey.');
         }
 
+        // Load questions for validation
+        $template->load(['questions' => function ($query) {
+            $query->orderByPivot('order');
+        }]);
+
         // Validate based on template questions
-        $rules = [];
+        $rules = ['template_id' => 'required'];
         foreach ($template->questions as $question) {
             $fieldName = 'question_' . $question->id;
 
@@ -120,7 +159,7 @@ class SurveyResponseController extends Controller
         );
 
         return redirect()->route('survey.form')
-            ->with('success', 'Survey submitted successfully! Thank you for your input.');
+            ->with('success', "Survey '{$template->title}' submitted successfully! Thank you for your input.");
     }
 
     /**
@@ -134,11 +173,21 @@ class SurveyResponseController extends Controller
             return response()->json(['success' => false, 'message' => 'No employee record found.']);
         }
 
-        $template = SurveyTemplate::where('is_active', true)->first();
+        $templateId = $request->input('template_id');
+        if (!$templateId) {
+            return response()->json(['success' => false, 'message' => 'Template ID required.']);
+        }
+
+        $template = SurveyTemplate::where('id', $templateId)
+            ->where('is_active', true)
+            ->first();
 
         if (!$template) {
-            return response()->json(['success' => false, 'message' => 'No active survey available.']);
+            return response()->json(['success' => false, 'message' => 'Survey not found or not active.']);
         }
+
+        // Filter out template_id from response data
+        $responseData = $request->except(['_token', 'template_id']);
 
         // Save as draft (no validation required)
         $response = SurveyResponse::updateOrCreate(
@@ -147,12 +196,40 @@ class SurveyResponseController extends Controller
                 'employee_id' => $employee->id,
             ],
             [
-                'response_data' => $request->all(),
+                'response_data' => $responseData,
                 'status' => 'draft',
             ]
         );
 
         return response()->json(['success' => true, 'message' => 'Draft saved!']);
+    }
+
+    /**
+     * Show active surveys dashboard or redirect to single active
+     */
+    public function activeAnalytics()
+    {
+        $activeTemplates = SurveyTemplate::where('is_active', true)
+            ->withCount(['responses as submitted_count' => function ($query) {
+                $query->where('status', 'submitted');
+            }])
+            ->orderBy('year', 'desc')
+            ->get();
+
+        if ($activeTemplates->isEmpty()) {
+            return redirect()->route('survey-templates.index')
+                ->with('info', 'No active survey template. Please activate a template first.');
+        }
+
+        // If only one active, redirect directly to its analytics
+        if ($activeTemplates->count() === 1) {
+            return redirect()->route('survey-responses.analytics', $activeTemplates->first());
+        }
+
+        // Show dashboard of all active templates
+        $totalEmployees = Employee::where('status', 'active')->count();
+
+        return view('survey-responses.active-dashboard', compact('activeTemplates', 'totalEmployees'));
     }
 
     /**

@@ -50,6 +50,14 @@ class SurveyTemplate extends Model
     }
 
     /**
+     * Get only submitted responses for this template
+     */
+    public function submittedResponses()
+    {
+        return $this->hasMany(SurveyResponse::class)->where('status', 'submitted');
+    }
+
+    /**
      * Get the active template
      */
     public function scopeActive($query)

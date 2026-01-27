@@ -490,7 +490,11 @@
                     </a>
                     <a href="{{ route('surveys.index') }}" class="nav-link {{ request()->routeIs('surveys.*') ? 'active' : '' }}">
                         <i class="bi bi-clipboard-data"></i>
-                        <span class="nav-link-text">Survey Results</span>
+                        <span class="nav-link-text">Training Survey</span>
+                    </a>
+                    <a href="{{ route('survey-responses.active') }}" class="nav-link {{ request()->routeIs('survey-responses.*') ? 'active' : '' }}">
+                        <i class="bi bi-bar-chart-line"></i>
+                        <span class="nav-link-text">Annual Survey Results</span>
                     </a>
                     <a href="{{ route('training-recommendations') }}" class="nav-link {{ request()->routeIs('training-recommendations') ? 'active' : '' }}">
                         <i class="bi bi-lightbulb"></i>

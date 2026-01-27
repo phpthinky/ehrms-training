@@ -4,9 +4,18 @@
 <div class="container px-4 py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
+            @if(isset($activeTemplates) && $activeTemplates->count() > 1)
+                <div class="mb-3">
+                    <a href="{{ route('survey.form') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Survey List
+                    </a>
+                </div>
+            @endif
+
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>{{ $template->title }}</h4>
+                    <small class="opacity-75">Year: {{ $template->year }}</small>
                 </div>
                 <div class="card-body">
                     @if($template->description)
@@ -17,6 +26,7 @@
 
                     <form action="{{ route('survey.submit') }}" method="POST" id="surveyForm">
                         @csrf
+                        <input type="hidden" name="template_id" value="{{ $template->id }}">
 
                         @foreach($template->questions as $index => $question)
                             <div class="mb-4 pb-3 border-bottom">
@@ -112,8 +122,11 @@
                             </div>
                         @endforeach
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="button" class="btn btn-outline-secondary" id="saveDraftBtn">
+                                <i class="bi bi-save me-2"></i>Save Draft
+                            </button>
+                            <button type="submit" class="btn btn-primary flex-grow-1">
                                 <i class="bi bi-check-circle me-2"></i>Submit Survey
                             </button>
                         </div>
@@ -123,4 +136,32 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.getElementById('saveDraftBtn').addEventListener('click', function() {
+    const form = document.getElementById('surveyForm');
+    const formData = new FormData(form);
+
+    fetch('{{ route('survey.draft') }}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Draft saved successfully!');
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error saving draft. Please try again.');
+    });
+});
+</script>
+@endpush
 @endsection

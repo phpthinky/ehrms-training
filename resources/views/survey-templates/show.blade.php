@@ -143,10 +143,10 @@
     </div>
 
     <!-- Recent Responses -->
-    @if($surveyTemplate->responses->count() > 0)
+    @if($surveyTemplate->submittedResponses->count() > 0)
     <div class="card mt-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Recent Responses</h5>
+            <h5 class="mb-0">Recent Responses ({{ $surveyTemplate->submittedResponses->count() }})</h5>
             <a href="{{ route('survey-responses.index', $surveyTemplate) }}" class="btn btn-sm btn-outline-primary">
                 View All
             </a>
@@ -163,11 +163,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($surveyTemplate->responses->take(10) as $response)
+                        @foreach($surveyTemplate->submittedResponses->take(10) as $response)
                             <tr>
                                 <td>{{ $response->employee->first_name }} {{ $response->employee->last_name }}</td>
                                 <td>{{ $response->employee->department->name ?? 'N/A' }}</td>
-                                <td>{{ $response->submitted_at->format('M d, Y') }}</td>
+                                <td>{{ $response->submitted_at ? $response->submitted_at->format('M d, Y H:i') : 'N/A' }}</td>
                                 <td>
                                     <a href="{{ route('survey-responses.show', $response) }}" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye"></i>

@@ -122,6 +122,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('survey-builder/question/{surveyQuestion}', [SurveyBuilderController::class, 'getQuestion'])->name('survey-builder.get-question');
 
         // Survey Response Analytics
+        Route::get('survey-responses/active', [SurveyResponseController::class, 'activeAnalytics'])->name('survey-responses.active');
         Route::get('survey-responses/template/{surveyTemplate}', [SurveyResponseController::class, 'index'])->name('survey-responses.index');
         Route::get('survey-responses/{surveyResponse}', [SurveyResponseController::class, 'show'])->name('survey-responses.show');
         Route::get('survey-analytics/{surveyTemplate}', [SurveyResponseController::class, 'analytics'])->name('survey-responses.analytics');

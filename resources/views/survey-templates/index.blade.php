@@ -19,6 +19,24 @@
         </div>
     @endif
 
+    @if(session('info'))
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ session('info') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @php
+        $activeCount = $templates->where('is_active', true)->count();
+    @endphp
+    @if($activeCount > 0)
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>{{ $activeCount }} survey(s) currently active.</strong>
+            Multiple surveys can be active at the same time. Employees will see all active surveys and can complete each one.
+        </div>
+    @endif
+
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">

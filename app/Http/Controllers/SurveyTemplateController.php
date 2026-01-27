@@ -44,17 +44,13 @@ class SurveyTemplateController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'year' => 'required|integer|unique:survey_templates,year',
+            'year' => 'required|integer',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
         ]);
 
-        // If setting as active, deactivate all others
-        if ($request->is_active) {
-            SurveyTemplate::where('is_active', true)->update(['is_active' => false]);
-        }
-
+        // Multiple templates can be active at the same time (removed deactivation logic)
         $template = SurveyTemplate::create([
             'year' => $validated['year'],
             'title' => $validated['title'],
@@ -78,7 +74,9 @@ class SurveyTemplateController extends Controller
             'questions' => function ($query) {
                 $query->orderByPivot('order');
             },
-            'responses.employee.department'
+            'submittedResponses' => function ($query) {
+                $query->with('employee.department')->orderBy('submitted_at', 'desc');
+            }
         ]);
 
         $stats = [
@@ -109,19 +107,13 @@ class SurveyTemplateController extends Controller
     public function update(Request $request, SurveyTemplate $surveyTemplate)
     {
         $validated = $request->validate([
-            'year' => 'required|integer|unique:survey_templates,year,' . $surveyTemplate->id,
+            'year' => 'required|integer',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
         ]);
 
-        // If setting as active, deactivate all others
-        if ($request->is_active) {
-            SurveyTemplate::where('id', '!=', $surveyTemplate->id)
-                ->where('is_active', true)
-                ->update(['is_active' => false]);
-        }
-
+        // Multiple templates can be active at the same time (removed deactivation logic)
         $surveyTemplate->update([
             'year' => $validated['year'],
             'title' => $validated['title'],
@@ -156,15 +148,12 @@ class SurveyTemplateController extends Controller
      */
     public function toggleActive(SurveyTemplate $surveyTemplate)
     {
-        if (!$surveyTemplate->is_active) {
-            // Deactivate all others
-            SurveyTemplate::where('is_active', true)->update(['is_active' => false]);
-            $surveyTemplate->update(['is_active' => true]);
-            $message = 'Survey template activated successfully!';
-        } else {
-            $surveyTemplate->update(['is_active' => false]);
-            $message = 'Survey template deactivated successfully!';
-        }
+        // Multiple templates can be active at the same time
+        $surveyTemplate->update(['is_active' => !$surveyTemplate->is_active]);
+
+        $message = $surveyTemplate->is_active
+            ? 'Survey template activated successfully!'
+            : 'Survey template deactivated successfully!';
 
         return back()->with('success', $message);
     }
