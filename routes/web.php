@@ -57,8 +57,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('employees/{employee}/trainings', [EmployeeController::class, 'trainings'])->name('employees.trainings');
 
     // External Training Requests - View & Download (accessible to HR and owner)
-    Route::get('external-training-requests/{externalTrainingRequest}', [ExternalTrainingRequestController::class, 'show'])->name('external-training-requests.show');
+    // Note: Using regex constraint to avoid conflict with /create route
     Route::get('external-training-requests/{externalTrainingRequest}/download/{type}', [ExternalTrainingRequestController::class, 'downloadDocument'])->name('external-training-requests.download');
+    Route::get('external-training-requests/{externalTrainingRequest}', [ExternalTrainingRequestController::class, 'show'])
+        ->where('externalTrainingRequest', '[0-9]+')
+        ->name('external-training-requests.show');
 
     // HR Admin & Admin Assistant Routes
     Route::middleware(['role:hr_admin,admin_assistant'])->group(function () {
