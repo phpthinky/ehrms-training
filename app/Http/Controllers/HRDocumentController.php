@@ -54,17 +54,17 @@ class HRDocumentController extends Controller
             $file = $request->file('file');
             $originalName = $file->getClientOriginalName();
             $extension = $file->getClientOriginalExtension();
-            
+
+            // Get file size in KB before moving (important!)
+            $fileSize = round($file->getSize() / 1024, 2);
+
             // Generate unique filename with timestamp
             $timestamp = now()->format('Ymd_His');
             $filename = $timestamp . '_' . str_replace(' ', '_', pathinfo($originalName, PATHINFO_FILENAME)) . '.' . $extension;
-            
+
             // Store in hr_documents directory
             $file->move(public_path('uploads/hr_documents'), $filename);
             $filePath = 'hr_documents/' . $filename;
-            
-            // Get file size in KB
-            $fileSize = round($file->getSize() / 1024, 2);
             
             // Create document record
             $document = HRDocument::create([
@@ -132,13 +132,15 @@ class HRDocumentController extends Controller
             $file = $request->file('file');
             $originalName = $file->getClientOriginalName();
             $extension = $file->getClientOriginalExtension();
-            
+
+            // Get file size before moving (important!)
+            $fileSize = round($file->getSize() / 1024, 2);
+
             $timestamp = now()->format('Ymd_His');
             $filename = $timestamp . '_' . str_replace(' ', '_', pathinfo($originalName, PATHINFO_FILENAME)) . '.' . $extension;
-            
+
             $file->move(public_path('uploads/hr_documents'), $filename);
             $filePath = 'hr_documents/' . $filename;
-            $fileSize = round($file->getSize() / 1024, 2);
             
             // Update file info
             $validated['file_name'] = $originalName;
