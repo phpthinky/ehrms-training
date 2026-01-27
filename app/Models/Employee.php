@@ -81,6 +81,51 @@ class Employee extends Model
         return $name;
     }
 
+    /**
+     * Get years of service formatted as "X years, Y months, Z days"
+     */
+    public function getYearsOfServiceFormattedAttribute(): string
+    {
+        if (!$this->date_hired) {
+            return 'N/A';
+        }
+
+        $now = now();
+        $diff = $this->date_hired->diff($now);
+
+        $parts = [];
+
+        if ($diff->y > 0) {
+            $parts[] = $diff->y . ' ' . ($diff->y === 1 ? 'year' : 'years');
+        }
+
+        if ($diff->m > 0) {
+            $parts[] = $diff->m . ' ' . ($diff->m === 1 ? 'month' : 'months');
+        }
+
+        if ($diff->d > 0) {
+            $parts[] = $diff->d . ' ' . ($diff->d === 1 ? 'day' : 'days');
+        }
+
+        if (empty($parts)) {
+            return 'Less than a day';
+        }
+
+        return implode(', ', $parts);
+    }
+
+    /**
+     * Get total years of service as decimal
+     */
+    public function getYearsOfServiceAttribute(): float
+    {
+        if (!$this->date_hired) {
+            return 0;
+        }
+
+        return round($this->date_hired->diffInDays(now()) / 365.25, 2);
+    }
+
     // Scopes
     public function scopeActive($query)
     {
