@@ -67,10 +67,11 @@ class ReportController extends Controller
         }
 
         // Department Training Distribution (Top 5)
+        $prefix = config('database.connections.mysql.prefix', 'hr_');
         $departmentTraining = DB::table('training_attendance')
             ->join('employees', 'training_attendance.employee_id', '=', 'employees.id')
             ->join('departments', 'employees.department_id', '=', 'departments.id')
-            ->selectRaw('departments.name, COUNT(DISTINCT training_attendance.employee_id) as count')
+            ->selectRaw("{$prefix}departments.name, COUNT(DISTINCT {$prefix}training_attendance.employee_id) as count")
             ->groupBy('departments.id', 'departments.name')
             ->orderByDesc('count')
             ->limit(5)
@@ -81,7 +82,7 @@ class ReportController extends Controller
             ->join('employees', 'training_surveys.employee_id', '=', 'employees.id')
             ->join('departments', 'employees.department_id', '=', 'departments.id')
             ->where('training_surveys.status', 'submitted')
-            ->selectRaw('departments.name, COUNT(training_surveys.id) as responses, COUNT(DISTINCT employees.id) as total_employees')
+            ->selectRaw("{$prefix}departments.name, COUNT({$prefix}training_surveys.id) as responses, COUNT(DISTINCT {$prefix}employees.id) as total_employees")
             ->groupBy('departments.id', 'departments.name')
             ->orderByDesc('responses')
             ->limit(5)
@@ -91,7 +92,7 @@ class ReportController extends Controller
         $surveyData = [];
         foreach ($surveyResponse as $dept) {
             $surveyLabels[] = $dept->name;
-            $employeesInDept = Employee::where('department_id', DB::table('departments')->where('name', $dept->name)->value('id'))->count();
+            $employeesInDept = Employee::where('department_id', Department::where('name', $dept->name)->value('id'))->count();
             $surveyData[] = $employeesInDept > 0 ? round(($dept->responses / $employeesInDept) * 100, 1) : 0;
         }
 
