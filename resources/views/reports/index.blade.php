@@ -347,6 +347,17 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
+@php
+    // Prepare chart data with fallbacks
+    $trendLabels = $chartData['trainingTrend']['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    $trendData = $chartData['trainingTrend']['data'] ?? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    $typeLabels = $chartData['trainingTypes']['labels'] ?? ['Internal', 'External'];
+    $typeData = $chartData['trainingTypes']['data'] ?? [0, 0];
+    $deptLabels = $chartData['departmentTraining']['labels'] ?? [];
+    $deptData = $chartData['departmentTraining']['data'] ?? [];
+    $surveyLabels = $chartData['surveyResponse']['labels'] ?? [];
+    $surveyData = $chartData['surveyResponse']['data'] ?? [];
+@endphp
 <script>
     // Chart colors
     const colors = {
@@ -365,10 +376,10 @@
     new Chart(trainingTrendCtx, {
         type: 'line',
         data: {
-            labels: @json($chartData['trainingTrend']['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']),
+            labels: @json($trendLabels),
             datasets: [{
                 label: 'Trainings Conducted',
-                data: @json($chartData['trainingTrend']['data'] ?? [5, 8, 12, 9, 15, 11, 14, 10, 13, 16, 12, 14]),
+                data: @json($trendData),
                 borderColor: colors.primary,
                 backgroundColor: colors.primary + '20',
                 borderWidth: 3,
@@ -415,9 +426,9 @@
     new Chart(trainingTypeCtx, {
         type: 'doughnut',
         data: {
-            labels: @json($chartData['trainingTypes']['labels'] ?? ['Internal', 'External']),
+            labels: @json($typeLabels),
             datasets: [{
-                data: @json($chartData['trainingTypes']['data'] ?? [65, 35]),
+                data: @json($typeData),
                 backgroundColor: [colors.primary, colors.success],
                 borderWidth: 0
             }]
@@ -453,10 +464,10 @@
     new Chart(departmentCtx, {
         type: 'bar',
         data: {
-            labels: @json($chartData['departmentTraining']['labels'] ?? ['HR', 'IT', 'Finance', 'Operations', 'Admin']),
+            labels: @json($deptLabels),
             datasets: [{
                 label: 'Training Participants',
-                data: @json($chartData['departmentTraining']['data'] ?? [45, 38, 32, 28, 25]),
+                data: @json($deptData),
                 backgroundColor: colors.success,
                 borderRadius: 8,
                 borderSkipped: false
@@ -495,10 +506,10 @@
     new Chart(surveyResponseCtx, {
         type: 'bar',
         data: {
-            labels: @json($chartData['surveyResponse']['labels'] ?? ['HR', 'IT', 'Finance', 'Operations', 'Admin']),
+            labels: @json($surveyLabels),
             datasets: [{
                 label: 'Response Rate (%)',
-                data: @json($chartData['surveyResponse']['data'] ?? [85, 78, 92, 65, 72]),
+                data: @json($surveyData),
                 backgroundColor: colors.warning,
                 borderRadius: 8,
                 borderSkipped: false
