@@ -68,19 +68,35 @@
                     <h6 class="mb-3" style="font-weight: 600;">Quick Stats</h6>
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted small">Trainings Attended</span>
-                        <a href="{{ route('employees.trainings', $employee) }}" class="text-decoration-none">
-                            <strong>{{ $employee->trainings->where('attendance_status', 'attended')->count() }}</strong>
-                        </a>
+                        <strong>{{ $employee->trainings->where('attendance_status', 'attended')->count() }}</strong>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted small">201 Files</span>
-                        <a href="{{ route('employee-files.index', $employee) }}" class="text-decoration-none">
-                            <strong>{{ $employee->files->count() }}</strong>
-                        </a>
+                        <strong>{{ $employee->files->count() }}</strong>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span class="text-muted small">Years of Service</span>
                         <strong>{{ $employee->years_of_service_formatted }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions for Files -->
+            <div class="card border-0 mt-3">
+                <div class="card-body">
+                    <h6 class="mb-3" style="font-weight: 600;">
+                        <i class="bi bi-folder2-open text-primary me-2"></i>201 Files Management
+                    </h6>
+                    <div class="d-grid gap-2">
+                        <a href="{{ route('employee-files.index', $employee) }}" class="btn btn-primary">
+                            <i class="bi bi-files me-2"></i>View All 201 Files
+                        </a>
+                        <a href="{{ route('employee-files.create', $employee) }}" class="btn btn-outline-primary">
+                            <i class="bi bi-cloud-upload me-2"></i>Upload New File
+                        </a>
+                        <a href="{{ route('employees.trainings', $employee) }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-journal-bookmark me-2"></i>View Training History
+                        </a>
                     </div>
                 </div>
             </div>
