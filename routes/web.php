@@ -12,8 +12,6 @@ use App\Http\Controllers\EmployeeFileController;
 use App\Http\Controllers\TrainingSurveyController;
 use App\Http\Controllers\TrainingAttendanceController;
 use App\Http\Controllers\HRDocumentController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TrainingProgramController;
 use App\Http\Controllers\SurveyTemplateController;
@@ -23,6 +21,7 @@ use App\Http\Controllers\SurveyResponseController;
 use App\Http\Controllers\TrainingTopicController;
 use App\Http\Controllers\SystemSettingsController;
 use App\Http\Controllers\ExternalTrainingRequestController;
+use App\Http\Controllers\ProfileSettingsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -216,9 +215,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('notifications/{notification}/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
     Route::post('notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
     
-    // Profile & Settings
-    Route::get('profile', [ProfileController::class, 'show'])->name('profile');
-    Route::get('settings', [SettingsController::class, 'show'])->name('settings');
+    // Profile & Account Settings
+    Route::get('profile', [ProfileSettingsController::class, 'profile'])->name('profile');
+    Route::get('settings', [ProfileSettingsController::class, 'settings'])->name('settings');
+    Route::put('settings/name', [ProfileSettingsController::class, 'updateName'])->name('settings.update-name');
+    Route::put('settings/email', [ProfileSettingsController::class, 'updateEmail'])->name('settings.update-email');
+    Route::put('settings/password', [ProfileSettingsController::class, 'updatePassword'])->name('settings.update-password');
 
     // Help & Guide (All authenticated users)
     Route::get('help', function () {

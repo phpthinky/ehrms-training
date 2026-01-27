@@ -80,7 +80,7 @@
                     </div>
                     <div class="d-flex justify-content-between">
                         <span class="text-muted small">Years of Service</span>
-                        <strong>{{ $employee->date_hired ? $employee->date_hired->diffInYears(\Carbon\Carbon::now()) : 'N/A' }}</strong>
+                        <strong>{{ $employee->years_of_service_formatted }}</strong>
                     </div>
                 </div>
             </div>
