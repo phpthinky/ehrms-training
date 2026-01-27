@@ -26,14 +26,8 @@ class SurveyTemplateController extends Controller
      */
     public function create()
     {
-        // Get next year if current year already has a template
-        $currentYear = date('Y');
-        $existingYears = SurveyTemplate::pluck('year')->toArray();
-
-        $suggestedYear = $currentYear;
-        while (in_array($suggestedYear, $existingYears)) {
-            $suggestedYear++;
-        }
+        // Suggest current year (multiple templates allowed per year with different titles)
+        $suggestedYear = date('Y');
 
         return view('survey-templates.create', compact('suggestedYear'));
     }
@@ -50,7 +44,18 @@ class SurveyTemplateController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        // Multiple templates can be active at the same time (removed deactivation logic)
+        // Check if same title already exists in the same year
+        $exists = SurveyTemplate::where('year', $validated['year'])
+            ->where('title', $validated['title'])
+            ->exists();
+
+        if ($exists) {
+            return back()->withInput()->withErrors([
+                'title' => 'A survey template with this title already exists for year ' . $validated['year'] . '.'
+            ]);
+        }
+
+        // Multiple templates can be active at the same time
         $template = SurveyTemplate::create([
             'year' => $validated['year'],
             'title' => $validated['title'],
@@ -113,7 +118,19 @@ class SurveyTemplateController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        // Multiple templates can be active at the same time (removed deactivation logic)
+        // Check if same title already exists in the same year (excluding current template)
+        $exists = SurveyTemplate::where('year', $validated['year'])
+            ->where('title', $validated['title'])
+            ->where('id', '!=', $surveyTemplate->id)
+            ->exists();
+
+        if ($exists) {
+            return back()->withInput()->withErrors([
+                'title' => 'A survey template with this title already exists for year ' . $validated['year'] . '.'
+            ]);
+        }
+
+        // Multiple templates can be active at the same time
         $surveyTemplate->update([
             'year' => $validated['year'],
             'title' => $validated['title'],
@@ -164,8 +181,19 @@ class SurveyTemplateController extends Controller
     public function duplicate(Request $request, SurveyTemplate $surveyTemplate)
     {
         $validated = $request->validate([
-            'year' => 'required|integer|unique:survey_templates,year',
+            'year' => 'required|integer',
         ]);
+
+        // Check if same title already exists in the target year
+        $exists = SurveyTemplate::where('year', $validated['year'])
+            ->where('title', $surveyTemplate->title)
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'year' => 'A survey template with title "' . $surveyTemplate->title . '" already exists for year ' . $validated['year'] . '.'
+            ]);
+        }
 
         $newTemplate = SurveyTemplate::create([
             'year' => $validated['year'],

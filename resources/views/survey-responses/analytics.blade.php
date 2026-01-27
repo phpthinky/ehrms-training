@@ -23,7 +23,7 @@
             <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Filter Results</h5>
         </div>
         <div class="card-body">
-            <form method="GET" action="{{ route('survey-analytics', $surveyTemplate) }}">
+            <form method="GET" action="{{ route('survey-responses.analytics', $surveyTemplate) }}">
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label">Start Date</label>
@@ -49,7 +49,7 @@
                             <i class="bi bi-search me-2"></i>Filter
                         </button>
                         @if(request()->hasAny(['start_date', 'end_date', 'department_id']))
-                            <a href="{{ route('survey-analytics', $surveyTemplate) }}" class="btn btn-outline-secondary">
+                            <a href="{{ route('survey-responses.analytics', $surveyTemplate) }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-x-circle"></i>
                             </a>
                         @endif
