@@ -90,20 +90,23 @@ class EmployeeFileController extends Controller
         ]);
 
         $file = $request->file('file');
-        
+
+        // Get file size before moving (important!)
+        $fileSize = $file->getSize();
+
         // Generate filename
         $fileType = $validated['file_type'];
         $fileName = time() . '_' . $employee->employee_number . '_' . $fileType . '.' . $file->getClientOriginalExtension();
-        
+
         // Store in public/uploads/employee_files/{employee_number}/
         $employeeFolder = 'employee_files/' . $employee->employee_number;
         $fullPath = public_path('uploads/' . $employeeFolder);
-        
+
         // Create directory if not exists
         if (!file_exists($fullPath)) {
             mkdir($fullPath, 0755, true);
         }
-        
+
         $file->move($fullPath, $fileName);
         $filePath = $employeeFolder . '/' . $fileName;
 
@@ -113,9 +116,9 @@ class EmployeeFileController extends Controller
             'file_name' => $fileName,
             'file_type' => $validated['file_type'],
             'file_path' => $filePath,
-            'file_size' => $file->getSize(),
+            'file_size' => $fileSize,
             'uploaded_by' => auth()->id(),
-            'remarks' => $validated['description'] ?? null,
+            'description' => $validated['description'] ?? null,
         ]);
 
         return redirect()->route('employee-files.index', $employee->id)
