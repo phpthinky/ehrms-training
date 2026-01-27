@@ -291,8 +291,12 @@ class ReportController extends Controller
      */
     public function departmentReport(Request $request)
     {
-        $departments = Department::withCount('employees')
-                                 ->where('is_active', true)
+        $departments = Department::with('employees')
+                                 ->withCount('employees')
+                                 ->where(function($query) {
+                                     $query->where('is_active', true)
+                                           ->orWhereNull('is_active');
+                                 })
                                  ->get();
 
         $departmentData = $departments->map(function($dept) {
