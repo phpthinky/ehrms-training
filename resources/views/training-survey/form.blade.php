@@ -39,7 +39,7 @@
                             <div class="card-body">
                                 <h6 class="mb-3">Your Selected Topics:</h6>
                                 @php
-                                    $selectedTopics = json_decode($existingSurvey->additional_topics, true) ?? [];
+                                    $selectedTopics = $existingSurvey->selected_topics ?? [];
                                     $topicsList = \App\Models\TrainingTopic::whereIn('id', $selectedTopics)->get();
                                 @endphp
                                 <div class="d-flex flex-wrap gap-2 justify-content-center">
@@ -73,7 +73,6 @@
                                         <ul class="mb-0 mt-2 small">
                                             <li>Select 1 to 5 training topics you're interested in</li>
                                             <li>You can suggest additional topics in the text field</li>
-                                            <li>Indicate your preferred schedule and format</li>
                                             <li>You can only submit once per year</li>
                                         </ul>
                                     </div>
@@ -109,39 +108,11 @@
                                 <small class="text-muted">Please select at least 1 topic, maximum 5 topics</small>
                             </div>
 
-                            <!-- Additional Topics -->
+                            <!-- Other Topics (Suggestions) -->
                             <div class="mb-4">
-                                <label class="form-label fw-semibold">Additional Topics (Optional)</label>
-                                <textarea name="additional_topics" class="form-control" rows="3" placeholder="Suggest other training topics not listed above">{{ old('additional_topics') }}</textarea>
+                                <label class="form-label fw-semibold">Other Topics / Suggestions (Optional)</label>
+                                <textarea name="other_topics" class="form-control" rows="3" placeholder="Suggest other training topics not listed above, or add any comments">{{ old('other_topics') }}</textarea>
                                 <small class="text-muted">If your desired training topic is not listed, you can suggest it here</small>
-                            </div>
-
-                            <!-- Preferred Schedule -->
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold">Preferred Schedule</label>
-                                <select name="preferred_schedule" class="form-select">
-                                    <option value="any" {{ old('preferred_schedule') == 'any' ? 'selected' : '' }}>Any time</option>
-                                    <option value="weekday_morning" {{ old('preferred_schedule') == 'weekday_morning' ? 'selected' : '' }}>Weekday Morning</option>
-                                    <option value="weekday_afternoon" {{ old('preferred_schedule') == 'weekday_afternoon' ? 'selected' : '' }}>Weekday Afternoon</option>
-                                    <option value="weekend" {{ old('preferred_schedule') == 'weekend' ? 'selected' : '' }}>Weekend</option>
-                                </select>
-                            </div>
-
-                            <!-- Preferred Format -->
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold">Preferred Training Format</label>
-                                <select name="preferred_format" class="form-select">
-                                    <option value="any" {{ old('preferred_format') == 'any' ? 'selected' : '' }}>Any format</option>
-                                    <option value="in_person" {{ old('preferred_format') == 'in_person' ? 'selected' : '' }}>In-Person</option>
-                                    <option value="online" {{ old('preferred_format') == 'online' ? 'selected' : '' }}>Online/Virtual</option>
-                                    <option value="hybrid" {{ old('preferred_format') == 'hybrid' ? 'selected' : '' }}>Hybrid (Both)</option>
-                                </select>
-                            </div>
-
-                            <!-- Remarks -->
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold">Remarks (Optional)</label>
-                                <textarea name="remarks" class="form-control" rows="3" placeholder="Any other comments or suggestions">{{ old('remarks') }}</textarea>
                             </div>
 
                             <!-- Submit Button -->
