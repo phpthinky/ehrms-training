@@ -42,13 +42,13 @@ class TrainingSurveyController extends Controller
     public function submit(Request $request)
     {
         $employee = auth()->user()->employee;
-        
+
         if (!$employee) {
             return back()->with('error', 'No employee record found.');
         }
 
         $currentYear = date('Y');
-        
+
         // Check if already submitted
         $existing = TrainingSurvey::where('employee_id', $employee->id)
             ->where('year', $currentYear)
@@ -61,10 +61,7 @@ class TrainingSurveyController extends Controller
         $validated = $request->validate([
             'topics' => 'required|array|min:1|max:5',
             'topics.*' => 'exists:training_topics,id',
-            'additional_topics' => 'nullable|string|max:1000',
-            'preferred_schedule' => 'nullable|in:weekday_morning,weekday_afternoon,weekend,any',
-            'preferred_format' => 'nullable|in:in_person,online,hybrid,any',
-            'remarks' => 'nullable|string|max:500',
+            'other_topics' => 'nullable|string|max:1000',
         ]);
 
         // Create or update survey
@@ -74,12 +71,8 @@ class TrainingSurveyController extends Controller
                 'year' => $currentYear,
             ],
             [
-                'training_topic_id' => $validated['topics'][0] ?? null,
-                'additional_topics' => json_encode($validated['topics']),
-                'other_topics' => $validated['additional_topics'] ?? null,
-                'preferred_schedule' => $validated['preferred_schedule'] ?? 'any',
-                'preferred_format' => $validated['preferred_format'] ?? 'any',
-                'remarks' => $validated['remarks'] ?? null,
+                'selected_topics' => $validated['topics'],
+                'other_topics' => $validated['other_topics'] ?? null,
                 'status' => 'submitted',
                 'submitted_at' => now(),
             ]
@@ -95,8 +88,8 @@ class TrainingSurveyController extends Controller
     public function index(Request $request)
     {
         $year = $request->get('year', date('Y'));
-        
-        $surveys = TrainingSurvey::with(['employee.department', 'topic'])
+
+        $surveys = TrainingSurvey::with(['employee.department'])
             ->where('year', $year)
             ->where('status', 'submitted')
             ->orderBy('submitted_at', 'desc')
@@ -113,11 +106,11 @@ class TrainingSurveyController extends Controller
      */
     public function show($id)
     {
-        $survey = TrainingSurvey::with(['employee.department', 'topic'])
+        $survey = TrainingSurvey::with(['employee.department'])
             ->findOrFail($id);
 
-        $selectedTopics = json_decode($survey->additional_topics, true) ?? [];
-        $topics = TrainingTopic::whereIn('id', $selectedTopics)->get();
+        $selectedTopicIds = $survey->selected_topics ?? [];
+        $topics = TrainingTopic::whereIn('id', $selectedTopicIds)->get();
 
         return view('training-survey.show', compact('survey', 'topics'));
     }
@@ -127,7 +120,8 @@ class TrainingSurveyController extends Controller
      */
     protected function getSurveyStats($year)
     {
-        $surveys = TrainingSurvey::where('year', $year)
+        $surveys = TrainingSurvey::with('employee.department')
+            ->where('year', $year)
             ->where('status', 'submitted')
             ->get();
 
@@ -137,7 +131,7 @@ class TrainingSurveyController extends Controller
         // Topic popularity
         $topicCounts = [];
         foreach ($surveys as $survey) {
-            $topics = json_decode($survey->additional_topics, true) ?? [];
+            $topics = $survey->selected_topics ?? [];
             foreach ($topics as $topicId) {
                 if (!isset($topicCounts[$topicId])) {
                     $topicCounts[$topicId] = 0;
@@ -159,18 +153,14 @@ class TrainingSurveyController extends Controller
             }
         }
 
-        usort($topicStats, function($a, $b) {
+        usort($topicStats, function ($a, $b) {
             return $b['count'] - $a['count'];
         });
 
-        $schedulePreferences = $surveys->groupBy('preferred_schedule')
-            ->map(function($group) { return $group->count(); });
-
-        $formatPreferences = $surveys->groupBy('preferred_format')
-            ->map(function($group) { return $group->count(); });
-
         $departmentStats = $surveys->groupBy('employee.department.name')
-            ->map(function($group) { return $group->count(); });
+            ->map(function ($group) {
+                return $group->count();
+            });
 
         return [
             'total_employees' => $totalEmployees,
@@ -178,8 +168,6 @@ class TrainingSurveyController extends Controller
             'pending_count' => $totalEmployees - $submittedCount,
             'response_rate' => $totalEmployees > 0 ? round(($submittedCount / $totalEmployees) * 100, 1) : 0,
             'topic_stats' => $topicStats,
-            'schedule_preferences' => $schedulePreferences,
-            'format_preferences' => $formatPreferences,
             'department_stats' => $departmentStats,
         ];
     }
@@ -190,36 +178,42 @@ class TrainingSurveyController extends Controller
     public function hrIndex()
     {
         $currentYear = date('Y');
-        
+
         // Get survey statistics
         $stats = $this->getSurveyStats($currentYear);
-        
-        // Get all submitted surveys with employee and topics
-        $surveys = TrainingSurvey::with(['employee.department', 'topics'])
+
+        // Get all submitted surveys with employee
+        $surveys = TrainingSurvey::with(['employee.department'])
             ->where('year', $currentYear)
             ->where('status', 'submitted')
             ->orderBy('updated_at', 'desc')
             ->get();
-        
+
         // Get all topics with request counts
         $topicCounts = [];
         foreach ($surveys as $survey) {
-            foreach ($survey->topics as $topic) {
-                if (!isset($topicCounts[$topic->id])) {
-                    $topicCounts[$topic->id] = [
-                        'topic' => $topic,
-                        'count' => 0,
-                    ];
+            $topicIds = $survey->selected_topics ?? [];
+            foreach ($topicIds as $topicId) {
+                if (!isset($topicCounts[$topicId])) {
+                    $topic = TrainingTopic::find($topicId);
+                    if ($topic) {
+                        $topicCounts[$topicId] = [
+                            'topic' => $topic,
+                            'count' => 0,
+                        ];
+                    }
                 }
-                $topicCounts[$topic->id]['count']++;
+                if (isset($topicCounts[$topicId])) {
+                    $topicCounts[$topicId]['count']++;
+                }
             }
         }
-        
+
         // Sort by count descending
-        usort($topicCounts, function($a, $b) {
+        usort($topicCounts, function ($a, $b) {
             return $b['count'] - $a['count'];
         });
-        
+
         return view('training-survey.hr-index', compact('surveys', 'stats', 'topicCounts', 'currentYear'));
     }
 }
